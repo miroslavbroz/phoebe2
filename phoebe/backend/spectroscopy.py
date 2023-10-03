@@ -52,28 +52,29 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
 
     sg = pyterpolmini.SyntheticGrid(flux_type='relative', debug=False)
 
-    z = 1.0      # 1 (solar)
-    step = 0.01  # Ang
+    z = 1.0					# 1
+    step = 0.01					# Ang
+    angstroms = wavelengths*1.0e10		# Ang
+    fluxes = np.zeros(len(wavelengths))		# 1
 
-    fluxes = np.zeros(len(wavelengths))
     for i in range(len(abs_intensities)):
         if Lum[i] == 0.0:
             continue
 
         props = {'teff': teffs[i], 'logg': loggs[i], 'z': z}
 
-        c = sg.get_synthetic_spectrum(props, wavelengths*1.0e10, order=2, step=step, padding=20.0)
+        c = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
 
         wave_ = pyterpolmini.doppler_shift(c.wave, rvs[i]*1.0e-3)
-        intens_ = pyterpolmini.interpolate_spectrum(wave_, c.intens, wavelengths*1.0e10)
+        intens_ = pyterpolmini.interpolate_spectrum(wave_, c.intens, angstroms)
 
-        for k in range(0,len(wavelengths)):
-            fluxes[k] += Lum[i]*intens_[k]
+        fluxes += Lum[i]*intens_
 
     Lumtot = np.sum(Lum)
     fluxes /= Lumtot
 
     return {'flux': fluxes[0]}
+
 
 spe = spe_integrate
 
