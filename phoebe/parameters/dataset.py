@@ -792,8 +792,8 @@ def spe(syn=False, as_ps=True, **kwargs):
     params += [FloatArrayParameter(qualifier='fluxes', value=_empty_array(kwargs, 'fluxes'), required_shape=[None] if not syn else None, readonly=syn, default_unit=u.dimensionless_unscaled, description='Synthetic fluxes' if syn else 'Observed fluxes')]
 
     if not syn:
-        params += [FloatArrayParameter(qualifier='compute_times', value=kwargs.get('compute_times', []), required_shape=[None], default_unit=u.d, description='Times to use during run_compute.  If empty, will use times parameter')]
-        params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.dimensionless_unscaled, description='Observed uncertainty of interferometric visibility')]
+        params += [FloatArrayParameter(qualifier='compute_times', value=kwargs.get('compute_times', []), required_shape=[None], default_unit=u.d, description='Times to use during run_compute. If empty, will use times parameter')]
+        params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.dimensionless_unscaled, description='Observed uncertainty of flux')]
 
     lc_params, lc_constraints = lc(syn=syn, as_ps=False, is_lc=False, **kwargs)
     params += lc_params

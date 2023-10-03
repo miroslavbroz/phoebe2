@@ -4,6 +4,9 @@
 pyterpolmini.py
 A 'miniaturized' version of Pyterpol3.
 
+Reference: Nemravová et al. (2016, A&A 594, A55).
+Reference: Brož (2017, ApJS 230, 19).
+
 """
 
 import sys

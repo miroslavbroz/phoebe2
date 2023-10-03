@@ -1287,7 +1287,7 @@ class PhoebeBackend(BaseBackendByTime):
 #                print("info = ", info)  # dbg
 #                val = 0.0; obs = {'flux': val}  # dbg
 
-                obs = spectroscopy.spe(b, system, wavelengths=wavelengths, info=info)
+                obs = spectroscopy.spe(b, system, wavelengths=wavelengths, info=info, k=k)
 
                 # Note: spectroscopy.spe_integrate() is used instead of system.observe()
 

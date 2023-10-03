@@ -18,7 +18,7 @@ from phoebe.backend import pyterpolmini
 
 fluxes = None
 
-def spe_integrate(b, system, wavelengths=None, info={}):
+def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     """
     Compute monochromatic flux F_nu.
 
@@ -28,7 +28,7 @@ def spe_integrate(b, system, wavelengths=None, info={}):
     global fluxes
 
     j = info['original_index']
-    if j > 0:
+    if k > 0:
         return {'flux': fluxes[j]} 
 
     meshes = system.meshes
@@ -57,6 +57,8 @@ def spe_integrate(b, system, wavelengths=None, info={}):
 
     fluxes = np.zeros(len(wavelengths))
     for i in range(len(abs_intensities)):
+        if Lum[i] == 0.0:
+            continue
 
         props = {'teff': teffs[i], 'logg': loggs[i], 'z': z}
 
