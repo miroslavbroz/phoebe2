@@ -8,6 +8,7 @@ import copy
 from phoebe.atmospheres import passbands
 from phoebe.distortions import roche, rotstar
 from phoebe.backend import eclipse, oc_geometry, mesh, mesh_wd
+from phoebe.backend import interferometry
 from phoebe.utils import _bytes
 import libphoebe
 
@@ -118,6 +119,11 @@ class System(object):
             body.system = self
             body.dynamics_method = dynamics_method
             body.boosting_method = boosting_method
+
+        self.distance = None
+        self.xi = None
+        self.yi = None
+        self.zi = None
 
         return
 
@@ -301,7 +307,7 @@ class System(object):
                                  ds=ds, Fs=Fs, ignore_effects=ignore_effects)
 
 
-    def populate_observables(self, time, kinds, datasets, ignore_effects=False):
+    def populate_observables(self, time, kinds, datasets, ignore_effects=False, **kwargs):
         """
         TODO: add documentation
 
@@ -316,7 +322,7 @@ class System(object):
 
         for kind, dataset in zip(kinds, datasets):
             for starref, body in self.items():
-                body.populate_observable(time, kind, dataset, ignore_effects=ignore_effects)
+                body.populate_observable(time, kind, dataset, ignore_effects=ignore_effects, **kwargs)
 
     def handle_reflection(self,  **kwargs):
         """
@@ -508,7 +514,7 @@ class System(object):
         return horizon
 
 
-    def observe(self, dataset, kind, components=None, **kwargs):
+    def observe(self, dataset, kind, components=None, info=None, **kwargs):
         """
         TODO: add documentation
 
@@ -631,7 +637,7 @@ class System(object):
         else:
             raise NotImplementedError("observe for dataset with kind '{}' not implemented".format(kind))
 
-
+        # Note: See spectroscopy.spe_integrate().
 
 
 class Body(object):
@@ -1266,7 +1272,8 @@ class Star(Body):
         if conf.devel and mesh_method=='marching' and compute is not None:
             kwargs.setdefault('mesh_init_phi', b.get_value(qualifier='mesh_init_phi', compute=compute, component=component, unit=u.rad, mesh_init_phi=kwargs.get('mesh_init_phi', None), **_skip_filter_checks))
 
-        datasets_intens = [ds for ds in b.filter(kind=['lc', 'rv', 'lp'], context='dataset').datasets if ds != '_default']
+        # Note: 'spe' is included too (for future mesh-based computations)
+        datasets_intens = [ds for ds in b.filter(kind=['lc', 'rv', 'lp', 'spe'], context='dataset').datasets if ds != '_default']
         datasets_lp = [ds for ds in b.filter(kind='lp', context='dataset', **_skip_filter_checks).datasets if ds != '_default']
         atm_override = kwargs.pop('atm', None)
         if isinstance(atm_override, dict):
@@ -1750,6 +1757,18 @@ class Star(Body):
         cols['rvs'] = rvs
         return cols
 
+    def _populate_spe(self, dataset, **kwargs):
+        """
+        Populate columns necessary for a spectroscopic dataset
+
+        """
+        logger.debug("{}._populate_spe(dataset={})".format(self.component, dataset))
+
+        cols = self._populate_rv(dataset, **kwargs)
+
+        # Note: See observe().
+
+        return cols
 
     def _populate_lc(self, dataset, ignore_effects=False, **kwargs):
         """
@@ -1762,6 +1781,9 @@ class Star(Body):
         """
         logger.debug("{}._populate_lc(dataset={}, ignore_effects={})".format(self.component, dataset, ignore_effects))
 
+#        print("dataset = ", dataset)  # dbg
+#        print("kwargs = ", kwargs)  # dbg
+
         lc_method = kwargs.get('lc_method', 'numerical')  # TODO: make sure this is actually passed
 
         passband = kwargs.get('passband', self.passband.get(dataset, None))
@@ -1769,10 +1791,11 @@ class Star(Body):
         atm = kwargs.get('atm', self.atm)
         extinct = kwargs.get('extinct', self.extinct)
         Rv = kwargs.get('Rv', self.Rv)
-        ld_mode = kwargs.get('ld_mode', self.ld_mode.get(dataset, None))
+        ld_mode = kwargs.get('ld_mode', self.ld_mode.get(dataset, 'manual'))
         ld_func = kwargs.get('ld_func', self.ld_func.get(dataset, None))
         ld_coeffs = kwargs.get('ld_coeffs', self.ld_coeffs.get(dataset, None)) if ld_mode == 'manual' else None
         ld_coeffs_source = kwargs.get('ld_coeffs_source', self.ld_coeffs_source.get(dataset, 'none')) if ld_mode == 'lookup' else None
+
         if ld_mode == 'interp':
             # calls to pb.Imu need to pass on ld_func='interp'
             # NOTE: we'll do another check when calling pb.Imu, but we'll also

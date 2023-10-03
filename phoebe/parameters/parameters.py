@@ -179,7 +179,7 @@ _forbidden_labels += ['protomesh', 'pbmesh']
 _forbidden_labels += ['bol']
 
 # forbid all kinds
-_forbidden_labels += ['lc', 'rv', 'lp', 'sp', 'orb', 'mesh']
+_forbidden_labels += ['lc', 'rv', 'lp', 'sp', 'orb', 'mesh', 'spe']
 _forbidden_labels += ['star', 'orbit', 'envelope']
 _forbidden_labels += ['spot', 'pulsation']
 _forbidden_labels += ['phoebe', 'legacy', 'jktebop', 'photodynam', 'ellc']
@@ -236,7 +236,8 @@ _forbidden_labels += ['times', 'fluxes', 'sigmas', 'sigmas_lnf',
                      'intensities', 'abs_intensities',
                      'normal_intensities', 'abs_normal_intensities',
                      'boost_factors', 'ldint', 'ptfarea',
-                     'pblum', 'pblum_ext', 'abs_pblum', 'abs_pblum_ext']
+                     'pblum', 'pblum_ext', 'abs_pblum', 'abs_pblum_ext',
+                     ]
 
 
 # from compute:
@@ -3363,9 +3364,8 @@ class ParameterSet(object):
                 twig = None
 
         if "index" in kwargs.keys():
-            return self.get_parameter(twig=twig,
-                                      **kwargs).set_index_value(value=value,
-                                                                **kwargs)
+            param = self.get_parameter(twig=twig, **kwargs)
+            return param.set_index_value(value=value, **kwargs)
 
         if "time" in kwargs.keys():
             if not len(self.filter(**kwargs)):
@@ -3647,6 +3647,7 @@ class ParameterSet(object):
         Currently supports the following datasets:
         * <phoebe.parameters.dataset.lc>
         * <phoebe.parameters.dataset.rv>
+        * <phoebe.parameters.dataset.spe>
 
         If necessary (due to the `compute_times`/`compute_phases` parameters
         or a change in the dataset `times` since the model was computed),
@@ -3723,6 +3724,8 @@ class ParameterSet(object):
             qualifier = 'fluxes'
         elif dataset_kind == 'rv':
             qualifier = 'rvs'
+        elif dataset_kind == 'spe':
+            qualifier = 'fluxes'
         else:
             # TODO: lp compared for a given time interpolating in wavelength?
             # NOTE: add to documentation if adding support for other datasets
@@ -4175,8 +4178,8 @@ class ParameterSet(object):
                 return_ += this_return
             return _handle_additional_calls(ps, return_)
 
-        if len(ps.components) > 1 and ps.context in ['model', 'dataset'] and ps.kind not in ['lc']:
-            # lc has per-component passband-dependent parameters in the dataset which are not plottable
+        if len(ps.components) > 1 and ps.context in ['model', 'dataset'] and ps.kind not in ['lc', 'spe']:
+            # lc, spe have per-component passband-dependent parameters in the dataset which are not plottable
             return_ = []
             for component in ps.filter(component=kwargs.get('component', filter_kwargs.get('component', None)), **_skip_filter_checks).exclude(qualifier=['*_phases', 'phases_*'], **_skip_filter_checks).components:
                 # print("*** component loop, component={}".format(component))
@@ -4293,6 +4296,10 @@ class ParameterSet(object):
             # entry in the dictionary to be the data-array itself
 
             current_value = kwargs.get(direction, None)
+
+#            print("kwargs = ", kwargs)  # dbg
+#            print("direction = ", direction)  # dbg
+#            print("ps = ", ps)  # dbg
 
             #### RETRIEVE DATA ARRAYS
             if isinstance(current_value, str):
@@ -4739,6 +4746,7 @@ class ParameterSet(object):
                         'y': 'etvs',
                         'z': 0}
             sigmas_avail = ['etvs']
+
         elif ps.kind in ['emcee', 'dynesty', 'lc_periodogram', 'rv_periodogram', 'lc_geometry', 'rv_geometry', 'ebai']:
             pass
             # handled below
@@ -4753,6 +4761,13 @@ class ParameterSet(object):
                 pass
             else:
                 return []
+
+        elif ps.kind == 'spe':
+            defaults = {'x': 'times',
+                        'y': 'fluxes',
+                        'z': 0}
+            sigmas_avail = ['fluxes']
+
         else:
             logger.debug("could not find plotting defaults for ps.meta: {}, ps.twigs: {}".format(ps.meta, ps.twigs))
             raise NotImplementedError("defaults for kind {} (dataset: {}) not yet implemented".format(ps.kind, ps.dataset))

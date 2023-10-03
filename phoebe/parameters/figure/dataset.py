@@ -198,3 +198,21 @@ def mesh(b, **kwargs):
     params += _figure_uncover_highlight_animate(b, uncover=False, highlight=False, **kwargs)
 
     return ParameterSet(params)
+
+def spe(b, **kwargs):
+    params = []
+
+    params += [SelectParameter(qualifier='contexts', value=kwargs.get('contexts', '*'), choices=['dataset', 'model'], description='Contexts to include in the plot')]
+    params += [SelectParameter(qualifier='datasets', value=kwargs.get('datasets', '*'), choices=[''], description='Datasets to include in the plot')]
+    params += [SelectParameter(qualifier='models', value=kwargs.get('models', '*'), choices=[''], description='Models to include in the plot')]
+
+    params += [ChoiceParameter(qualifier='x', value=kwargs.get('x', 'times'), choices=['times', 'wavelengths'], description='Array to plot along x-axis')]
+    params += [ChoiceParameter(qualifier='y', value=kwargs.get('y', 'fluxes'), choices=['fluxes', 'residuals'], description='Array to plot along y-axis')]
+
+    params += _label_units_lims('times', visible_if='x:times', default_unit=u.d, is_default=True, **kwargs)
+    params += _label_units_lims('wavelengths', visible_if='x:wavelengths', default_unit=u.m, is_default=True, **kwargs)
+    params += _label_units_lims('fluxes', default_unit=u.dimensionless_unscaled, is_default=True, **kwargs)
+
+    return ParameterSet(params)
+
+
