@@ -8,7 +8,6 @@ import copy
 from phoebe.atmospheres import passbands
 from phoebe.distortions import roche, rotstar
 from phoebe.backend import eclipse, oc_geometry, mesh, mesh_wd
-from phoebe.backend import interferometry
 from phoebe.utils import _bytes
 import libphoebe
 
