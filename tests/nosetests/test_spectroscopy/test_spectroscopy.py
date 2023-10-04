@@ -29,6 +29,7 @@ b.set_value('ntriangles@secondary', context='compute', value=100)
 from phoebe.backend import spectroscopy
 from phoebe.backend import pyterpolmini
 
+pyterpolmini.grid_directory = os.path.join(dir_, "grids")
 pyterpolmini.grid_dict = dict(
     identification=[
         'test',
