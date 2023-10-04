@@ -1161,6 +1161,10 @@ class PhoebeBackend(BaseBackendByTime):
             logger.debug("rank:{}/{} PhoebeBackend._run_single_time: calling system.populate_observables at time={}".format(mpi.myrank, mpi.nprocs, time))
             system.populate_observables(time, populate_kinds, populate_datasets)
 
+        # save temporary velocities (for spectroscopy)
+        system.vxi = vxi
+        system.vyi = vyi
+        system.vzi = vzi
         system.distance = b.get_value('distance@system')
 
         logger.debug("rank:{}/{} PhoebeBackend._run_single_time: filling packets at time={}".format(mpi.myrank, mpi.nprocs, time))
@@ -1180,6 +1184,14 @@ class PhoebeBackend(BaseBackendByTime):
             if kind == 'spe' and dataset != previous:
                 wavelengths = b.get_value('wavelengths@'+dataset+'@dataset')
                 previous = dataset
+
+                spe_method = b.get_value('spe_method@'+dataset+'@dataset')
+                if spe_method == 'integrate':
+                    spectroscopy.spe = spectroscopy.spe_integrate
+                elif spe_method == 'simple':
+                    spectroscopy.spe = spectroscopy.spe_simple
+                else:
+                    raise NotImplementedError("spe_method='{}' not supported".format(spe_method))
 
             # now check the kind to see what we need to fill
             if kind=='lp':

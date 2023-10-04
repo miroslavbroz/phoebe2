@@ -123,6 +123,9 @@ class System(object):
         self.xi = None
         self.yi = None
         self.zi = None
+        self.vxi = None
+        self.vyi = None
+        self.vzi = None
 
         return
 
