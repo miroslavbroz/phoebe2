@@ -87,7 +87,7 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
 
         s = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
 
-        wave_ = pyterpolmini.doppler_shift(s.wave, rv)
+        wave_ = pyterpolmini.doppler_shift(s.wave, -rv)
         intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
         intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)
 
