@@ -107,22 +107,28 @@ def is_within_interval(v, arr):
 
 def doppler_shift(wave, rv):
 
-    return wave * (1.0 + rv*1000.0/c.value)
+    return wave * (1.0 + rv*1.0e3/c.value)
 
-def interpolate_spectrum(wave, flux, wave_):
+def interpolate_spectrum(wave, intens, wave_):
 
-    tck = splrep(wave, flux, k=3)
-    flux_ = splev(wave_, tck) 
+    tck = splrep(wave, intens, k=3)
+    intens_ = splev(wave_, tck) 
 
-    return flux_
+    return intens_
 
-def instrumental_broadening(wave, flux, width=0.25, type='fwhm'):
+def instrumental_broadening(wave, intens, width=0.25, type='fwhm'):
     """
-    A convolution of a spectrum with a normal distribution.
+    Instrumental broadening; a convolution with a normal distribution.
+
+    :param wave: wavelengths
+    :param intens: intensities
+    :param width: width in A
+    :param type: either 'fwhh', or 'sigma'
+    :return intens: the broadened spectrum
 
     """
     if width < ZERO_TOLERANCE:
-        return flux
+        return intens
 
     if type == 'fwhm':
         sigma = width/2.3548
@@ -137,7 +143,7 @@ def instrumental_broadening(wave, flux, width=0.25, type='fwhm'):
     n = int(Delta/delta) + 1
     wave_ = np.linspace(wave[0], wave[-1], n)
 
-    flux_ = interpolate_spectrum(wave, flux, wave_)
+    intens_ = interpolate_spectrum(wave, intens, wave_)
 
     # Construct the kernel!
     delta = wave_[1]-wave_[0]
@@ -155,15 +161,60 @@ def instrumental_broadening(wave, flux, width=0.25, type='fwhm'):
     kernel /= sum(kernel)
 
     # Convolve the flux!
-    flux_conv = fftconvolve(1.0-flux_, kernel, mode='same')
+    intens_conv = fftconvolve(1.0-intens_, kernel, mode='same')
 
     if n_kernel%2 == 1:
         offset = 0.0
     else:
         offset = dwave/2.0
 
-    flux = np.interp(wave+offset, wave_, 1.0-flux_conv, left=1, right=1)
-    return flux
+    intens = np.interp(wave+offset, wave_, 1.0-intens_conv, left=1, right=1)
+    return intens
+
+def rotational_broadening(wave, intens, vrot, epsilon=0.6):
+    """
+    Rotational broadening.
+
+    :param wave: wavelengths
+    :param intens: intensities
+    :param vrot: projected rotational velocity in km/s
+    :param epsilon: coefficient of linear limb-darkening
+    :return intens: the rotated spectrum
+
+    """
+    if vrot < ZERO_TOLERANCE:
+        return intens
+
+    # Make sure the RVs are equidistant
+    wave_log = np.log(wave)
+    rv = np.linspace(wave_log[0], wave_log[-1], len(wave))
+    step = rv[1] - rv[0]
+
+    intens_rv = interpolate_spectrum(wave_log, intens, rv)
+
+    vrot *= 1.0e3/c.value
+
+    # Construct the kernel!
+    n = int(np.ceil(2.0*vrot/step))
+    rv_ker = np.arange(n)*step
+    rv_ker = rv_ker - rv_ker[-1]/2.0
+    y = 1.0 - (rv_ker/vrot)**2
+
+    kernel = (2.0*(1.0-epsilon)*np.sqrt(y) + np.pi*epsilon/2.0*y) / (np.pi*vrot*(1.0-epsilon/3.0))
+    kernel /= kernel.sum()
+
+    # Convolve the flux!
+    intens_conv = fftconvolve(1 - intens_rv, kernel, mode='same')
+
+    if n % 2 == 1:
+        rv = np.arange(len(intens_conv))*step + rv[0]
+    else:
+        rv = np.arange(len(intens_conv))*step + rv[0] - step/2.0
+
+    wave_conv = np.exp(rv)
+
+    intens = interpolate_spectrum(wave_conv, 1.0-intens_conv, wave)
+    return intens
 
 def interpolate_block_fast(x, block, xnew):
     """
