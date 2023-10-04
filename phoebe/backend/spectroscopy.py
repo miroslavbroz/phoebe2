@@ -158,8 +158,9 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
 
         s = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
 
-        wave_ = pyterpolmini.doppler_shift(s.wave, rvs[i]*1.0e-3)	# km/s
-        intens_ = pyterpolmini.interpolate_spectrum(wave_, s.intens, angstroms)
+        rv = rvs[i]*1.0e-3							# km/s
+        wave_ = pyterpolmini.doppler_shift(s.wave, rv)				# Ang
+        intens_ = pyterpolmini.interpolate_spectrum(wave_, s.intens, angstroms)	# 1
 
         fluxes += Lum[i]*intens_
 

@@ -685,14 +685,12 @@ class SyntheticGrid:
 
                 spectrum.load_spectrum()
 
-                if truncate:
-                    spectrum.truncate_spectrum(wmin, wmax)
             else:
                 if not spectrum.check_boundaries(wmin, wmax):
                     spectrum.load_spectrum()
 
-                    if truncate:
-                        spectrum.truncate_spectrum(wmin, wmax)
+            if truncate:
+                spectrum.truncate_spectrum(wmin, wmax)
 
             # Note: It is crucial that all spectra have the same wavelength scale!
 

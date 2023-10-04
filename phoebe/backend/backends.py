@@ -1169,22 +1169,22 @@ class PhoebeBackend(BaseBackendByTime):
 
         logger.debug("rank:{}/{} PhoebeBackend._run_single_time: filling packets at time={}".format(mpi.myrank, mpi.nprocs, time))
         # now let's loop through and prepare a packet which will fill the synthetics
-        packetlist = []
         previous = None
+        packetlist = []
+
         for k, info in enumerate(infolist):
             packet = dict()
 
-            #i, time, info['kind'], info['component'], info['dataset']
             cind = starrefs.index(info['component']) if info['component'] in starrefs else None
-            #ts[i], xs[cind][i], ys[cind][i], zs[cind][i], vxs[cind][i], vys[cind][i], vzs[cind][i]
             kind = info['kind']
             dataset = info['dataset']
 
-            # save baselines and wavelengths (for interferometry)
+            # save wavelengths (for spectroscopy)
             if kind == 'spe' and dataset != previous:
                 wavelengths = b.get_value('wavelengths@'+dataset+'@dataset')
                 previous = dataset
-
+                k = 0
+ 
                 spe_method = b.get_value('spe_method@'+dataset+'@dataset')
                 if spe_method == 'integrate':
                     spectroscopy.spe = spectroscopy.spe_integrate
