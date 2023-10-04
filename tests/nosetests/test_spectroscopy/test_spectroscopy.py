@@ -13,7 +13,7 @@ logger = phoebe.logger(clevel='INFO')
 
 b = phoebe.default_binary()
 
-times, wavelengths, fluxes, sigmas = np.loadtxt("Spe.dat", usecols=[0, 1, 2, 3], unpack=True)
+times, wavelengths, fluxes, sigmas = np.loadtxt(os.path.join(dir_, "Spe.dat"), usecols=[0, 1, 2, 3], unpack=True)
 
 b.add_dataset('spe', times=times, wavelengths=wavelengths, fluxes=fluxes, sigmas=sigmas, passband='Johnson:R')
 
