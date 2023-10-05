@@ -106,7 +106,7 @@ def _needs_mesh(b, dataset, kind, component, compute):
         return False
 
     # Note: 'spe' is included too (for future mesh-based computations)
-    if kind not in ['mesh', 'lc', 'rv', 'lp', 'spe']:
+    if kind not in ['mesh', 'lc', 'rv', 'lp', 'spe', 'sed']:
         return False
 
     # if kind == 'lc' and compute_kind=='phoebe' and b.get_value(qualifier='lc_method', compute=compute, dataset=dataset, context='compute')=='analytical':
@@ -218,7 +218,7 @@ def _extract_from_bundle(b, compute, dataset=None, times=None,
         dataset_compute_ps = b.filter(context='compute', dataset=dataset, compute=compute, **_skip_filter_checks)
         dataset_kind = dataset_ps.kind
         time_qualifier = _timequalifier_by_kind(dataset_kind)
-        if dataset_kind in ['lc', 'spe']:
+        if dataset_kind in ['lc', 'spe', 'sed']:
             # then the Parameters in the model only exist at the system-level
             # and are not tagged by component
             dataset_components = [None]
@@ -510,6 +510,7 @@ class BaseBackend(object):
 
         logger.debug("rank:{}/{} calling get_packet_and_syns".format(mpi.myrank, mpi.nprocs))
         packet, new_syns = self.get_packet_and_syns(b, compute, dataset, times, **kwargs)
+        print("new_syns = ", new_syns)  # dbg
 
         if mpi.enabled:
             # broadcast the packet to ALL workers
@@ -1193,6 +1194,11 @@ class PhoebeBackend(BaseBackendByTime):
                 else:
                     raise NotImplementedError("spe_method='{}' not supported".format(spe_method))
 
+            elif kind == 'sed' and dataset != previous:
+                wavelengths = b.get_value('wavelengths@'+dataset+'@dataset')
+                previous = dataset
+                k = 0
+
             # now check the kind to see what we need to fill
             if kind=='lp':
                 profile_func = b.get_value(qualifier='profile_func',
@@ -1305,6 +1311,18 @@ class PhoebeBackend(BaseBackendByTime):
 
                 packetlist.append(_make_packet('fluxes',
                                  obs['flux']*u.dimensionless_unscaled,
+                                 time,
+                                 info,
+                                 index=info['original_index']))
+
+            elif kind=='sed':
+
+                obs = spectroscopy.sed(b, system, wavelengths=wavelengths, info=info, k=k)
+
+                # Note: spectroscopy.sed_integrate() is used instead of system.observe()
+
+                packetlist.append(_make_packet('fluxes',
+                                 obs['flux']*u.W/u.m**3,
                                  time,
                                  info,
                                  index=info['original_index']))

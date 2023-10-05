@@ -12123,6 +12123,9 @@ class Bundle(ParameterSet):
                 for spe_param in ml_params.filter(qualifier=['wavelengths'], kind='spe', **_skip_filter_checks).to_list():
                     spe_param.set_value(self.get_value(spe_param.twig+'@dataset'), ignore_readonly=True)
 
+                for sed_param in ml_params.filter(qualifier=['wavelengths'], kind='sed', **_skip_filter_checks).to_list():
+                    sed_param.set_value(self.get_value(sed_param.twig+'@dataset'), ignore_readonly=True)
+
                 ml_addl_params += [StringParameter(qualifier='comments', value=kwargs.get('comments', computeparams.get_value(qualifier='comments', default='', **_skip_filter_checks)), description='User-provided comments for this model.  Feel free to place any notes here.')]
                 self._attach_params(ml_params+ml_addl_params, check_copy_for=False, **metawargs)
 

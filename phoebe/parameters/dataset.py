@@ -805,6 +805,30 @@ def spe(syn=False, as_ps=True, **kwargs):
 
     return ParameterSet(params) if as_ps else params, constraints
 
+def sed(syn=False, as_ps=True, **kwargs):
+    """
+    Create a <phoebe.parameters.ParameterSet> for an SED dataset.
+
+    Note: See lc().
+
+    """
+
+    params, constraints = [], []
+
+    params += [FloatArrayParameter(qualifier='times', value=kwargs.get('times', []), required_shape=[None], readonly=syn, default_unit=u.d, description='Model (synthetic) times' if syn else 'Observed times')]
+    params += [FloatArrayParameter(qualifier='wavelengths', value=kwargs.get('wavelengths', []), required_shape=[None], readonly=syn, default_unit=u.m, description='Synthetic wavelengths' if syn else 'Observed wavelengths')]
+    params += [FloatArrayParameter(qualifier='fluxes', value=_empty_array(kwargs, 'fluxes'), required_shape=[None] if not syn else None, readonly=syn, default_unit=u.W/u.m**3, description='Synthetic fluxes' if syn else 'Observed fluxes')]
+
+    if not syn:
+        params += [FloatArrayParameter(qualifier='compute_times', value=kwargs.get('compute_times', []), required_shape=[None], default_unit=u.d, description='Times to use during run_compute. If empty, will use times parameter')]
+        params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.W/u.m**3, description='Observed uncertainty of flux')]
+
+    lc_params, lc_constraints = lc(syn=syn, as_ps=False, is_lc=False, **kwargs)
+    params += lc_params
+    constraints += lc_constraints
+
+    return ParameterSet(params) if as_ps else params, constraints
+
 
 # del _empty_array
 # del deepcopy

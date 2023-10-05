@@ -641,6 +641,8 @@ class System(object):
 
         # Note: See spectroscopy.spe_integrate().
 
+        # Note: See spectroscopy.sed_integrate().
+
 
 class Body(object):
     """
@@ -1275,7 +1277,7 @@ class Star(Body):
             kwargs.setdefault('mesh_init_phi', b.get_value(qualifier='mesh_init_phi', compute=compute, component=component, unit=u.rad, mesh_init_phi=kwargs.get('mesh_init_phi', None), **_skip_filter_checks))
 
         # Note: 'spe' is included too (for future mesh-based computations)
-        datasets_intens = [ds for ds in b.filter(kind=['lc', 'rv', 'lp', 'spe'], context='dataset').datasets if ds != '_default']
+        datasets_intens = [ds for ds in b.filter(kind=['lc', 'rv', 'lp', 'spe', 'sed'], context='dataset').datasets if ds != '_default']
         datasets_lp = [ds for ds in b.filter(kind='lp', context='dataset', **_skip_filter_checks).datasets if ds != '_default']
         atm_override = kwargs.pop('atm', None)
         if isinstance(atm_override, dict):
@@ -1765,6 +1767,19 @@ class Star(Body):
 
         """
         logger.debug("{}._populate_spe(dataset={})".format(self.component, dataset))
+
+        cols = self._populate_rv(dataset, **kwargs)
+
+        # Note: See observe().
+
+        return cols
+
+    def _populate_sed(self, dataset, **kwargs):
+        """
+        Populate columns necessary for a spectroscopic dataset
+
+        """
+        logger.debug("{}._populate_sed(dataset={})".format(self.component, dataset))
 
         cols = self._populate_rv(dataset, **kwargs)
 
