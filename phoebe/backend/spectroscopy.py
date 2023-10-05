@@ -141,11 +141,10 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     rvs = (meshes.get_column_flat("rvs:{}".format(dataset), components)*u.solRad/u.d).to(u.m/u.s).value
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
+    zs = 10.0**meshes.get_column_flat('abuns', components)
 
     Lum = abs_intensities*areas*mus*visibilities		# J s^-1 m^-1
 
-    # Note: metallicity should be per-triangle!
-    z = 1.0					# 1
     step = 0.01					# Ang
     angstroms = wavelengths*1.0e10		# Ang
     fluxes = np.zeros(len(wavelengths))		# 1
@@ -154,7 +153,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
         if Lum[i] == 0.0:
             continue
 
-        props = {'teff': teffs[i], 'logg': loggs[i], 'z': z}
+        props = {'teff': teffs[i], 'logg': loggs[i], 'z': zs[i]}
 
         s = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
 

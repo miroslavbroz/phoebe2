@@ -220,9 +220,9 @@ def interpolate_block_fast(x, block, xnew):
     """
     Interpolation of a *block* of spectra; a fast version.
 
-    :param x:
-    :param block:
-    :param xnew:
+    :param x: parameters (teff, logg, z)
+    :param block: a block of spectra
+    :param xnew: new parameters, to interpolate at
     :return:
     """
 
@@ -392,8 +392,8 @@ class SyntheticSpectrum:
             intens = instrumental_broadening(syn_wave, intens, width=fwhm)
 
         # rotational broadening
-        #if vrot is not None and vrot > ZERO_TOLERANCE:
-        #    intens, syn_wave = rotational_broadening(syn_wave, intens, vrot, interpolate_back=False)
+        if vrot is not None and vrot > ZERO_TOLERANCE:
+            intens, syn_wave = rotational_broadening(syn_wave, intens, vrot, interpolate_back=False)
 
         # Doppler shift
         if rv is not None and abs(rv) > ZERO_TOLERANCE:
@@ -447,7 +447,6 @@ class SyntheticSpectrum:
         ind = np.where((self.wave >= wmin) & (self.wave <= wmax))[0]
         self.wave = self.wave[ind]
         self.intens = self.intens[ind]
-
 
 ########################################################################
 
