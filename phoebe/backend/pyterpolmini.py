@@ -444,7 +444,7 @@ class SyntheticSpectrum:
         if (self.wave.min() > wmin) | (self.wave.max() < wmax):
             raise ValueError('The spectrum %s does not cover the whole spectral region <%s,%s>.' % (str(self).rstrip('\n'), str(wmin), str(wmax)))
 
-        ind = np.where((self.wave >= wmin) & (self.wave <= wmax))[0]
+        ind = np.where((self.wave >= wmin-ZERO_TOLERANCE) & (self.wave <= wmax+ZERO_TOLERANCE))[0]
         self.wave = self.wave[ind]
         self.intens = self.intens[ind]
 
@@ -506,8 +506,9 @@ class SyntheticGrid:
         for i, d in enumerate(directories):
             gridlist = os.path.join(self.grid_directory, d, 'gridlist')
             directory = os.path.join(self.grid_directory, d)
+            family = families[i]
 
-            self.read_gridlist(gridlist, columns=columns, directory=directory, family=families)
+            self.read_gridlist(gridlist, columns=columns, directory=directory, family=family)
 
     def __str__(self):
         """String representation."""
@@ -779,7 +780,7 @@ class SyntheticGrid:
         """
         ind = []
         for i in range(0, len(spectra)):
-            ind.append(self.grid_order.index(spectra[i]['family']))
+            ind.append(self.grid_order.index(spectra[i].props['family']))
 
         ind = np.array(ind)
         if np.any(ind < -1):

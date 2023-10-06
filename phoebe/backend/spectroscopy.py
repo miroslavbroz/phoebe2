@@ -144,11 +144,11 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
 
-    Lum = abs_intensities*areas*mus*visibilities		# J s^-1 m^-1
+    Lum = abs_intensities*areas*mus*visibilities	# J s^-1 m^-1
 
-    step = 0.01					# Ang
-    angstroms = wavelengths*1.0e10		# Ang
-    fluxes = np.zeros(len(wavelengths))		# 1
+    step = 0.01						# Ang
+    angstroms = wavelengths*1.0e10			# Ang
+    fluxes = np.zeros(len(wavelengths))			# 1
 
     for i in range(len(Lum)):
         if Lum[i] == 0.0:
@@ -203,7 +203,14 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
 
+    d = system.distance				# m
     Lum = areas*mus*visibilities		# m^2
+    Lum /= d**2					# 1
+
+    # Note: a factor 1/pi is needed to obtain the solar values:
+    # F_lambda ~ 2.e9 W m^-2 m^-1 (at Earth, 550 nm; Verbunt 2008)
+    # F = \int F_lambda dlambda = 1363 W m^-2 (Kopp & Lean 2011)
+    Lum /= np.pi				# 1
 
     step = 0.1					# Ang
     angstroms = wavelengths*1.0e10		# Ang
