@@ -10,7 +10,7 @@ k = 1.38e-23		# J K^-1
 sigma = 5.68e-8		# W m^-2 K^-4
 R_S = 6.957e8		# m
 au = 1.496e11		# m
-T = 5770.0		# K
+T = 6000.0		# K
 R = 1.*R_S
 d = 1.*au
 
@@ -21,7 +21,7 @@ set xl "wave [A]"
 set yl "fluxes [W m^{-2} m^{-1}], at Earth"
 
 #set xr [3000:10000]
-set yr [0:2.e9]
+set yr [0:]
 set zeroaxis
 set key bottom
 

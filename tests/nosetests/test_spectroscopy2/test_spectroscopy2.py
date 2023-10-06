@@ -11,7 +11,7 @@ dir_ = os.path.dirname(os.path.realpath(__file__))
 logger = phoebe.logger(clevel='INFO')
 #logger = phoebe.logger(clevel='DEBUG')
 
-b = phoebe.default_star()
+b = phoebe.default_binary()
 
 times, wavelengths, fluxes, sigmas = np.loadtxt(os.path.join(dir_, "Sed.dat"), usecols=[0, 1, 2, 3], unpack=True)
 
@@ -22,8 +22,8 @@ print("b['wavelengths@sed01@sed@dataset'] = ", b['wavelengths@sed01@sed@dataset'
 print("b['fluxes@sed01@sed@dataset'] = ", b['fluxes@sed01@sed@dataset'])
 
 b.set_value('distance', context='system', value=1*units.au)
-b.set_value('teff@starA', context='component', value=5770.)
-b.set_value('ntriangles@starA', context='compute', value=100)
+b.set_value('ntriangles@primary', context='compute', value=100)
+b.set_value('ntriangles@secondary', context='compute', value=100)
 
 # Note: Using a tiny test grid.
 from phoebe.backend import spectroscopy

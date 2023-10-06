@@ -4,11 +4,11 @@ f = open("Sed.dat", "w")
 f.write("# time wavelength flux sigma\n")
 
 t1 = 0.0            # d
-t2 = 0.0            # d
+t2 = 0.25           # d
 dt = 0.25           # d
 wave1 = 6500.0e-10  # m
 wave2 = 6600.0e-10  # m
-dwave = 0.1e-10     # m
+dwave = 1.0e-10     # m
 flux = 1.0          # 1
 sigma = 0.01        # 1
 
