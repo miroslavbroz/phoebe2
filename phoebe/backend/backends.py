@@ -510,7 +510,6 @@ class BaseBackend(object):
 
         logger.debug("rank:{}/{} calling get_packet_and_syns".format(mpi.myrank, mpi.nprocs))
         packet, new_syns = self.get_packet_and_syns(b, compute, dataset, times, **kwargs)
-        print("new_syns = ", new_syns)  # dbg
 
         if mpi.enabled:
             # broadcast the packet to ALL workers
@@ -1198,6 +1197,14 @@ class PhoebeBackend(BaseBackendByTime):
                 wavelengths = b.get_value('wavelengths@'+dataset+'@dataset')
                 previous = dataset
                 k = 0
+
+                sed_method = b.get_value('sed_method@'+dataset+'@dataset')
+                if sed_method == 'integrate':
+                    spectroscopy.sed = spectroscopy.sed_integrate
+                elif sed_method == 'simple':
+                    spectroscopy.sed = spectroscopy.sed_simple
+                else:
+                    raise NotImplementedError("sed_method='{}' not supported".format(sed_method))
 
             # now check the kind to see what we need to fill
             if kind=='lp':

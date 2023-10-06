@@ -169,6 +169,63 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
 
     return {'flux': fluxes[0]}
 
+########################################################################
+
+def sed_simple(b, system, wavelengths=None, info={}, k=None):
+    """
+    Compute absolute monochromatic flux F_nu.
+
+    Note: See spe_simple().
+
+    """
+    global sg2
+    global fluxes
+
+    if sg2 is None:
+        sg2 = pyterpolmini.SyntheticGrid(flux_type='absolute', debug=False)
+
+    j = info['original_index']
+    if k > 0:
+        return {'flux': fluxes[j]}
+
+    components = info['component']
+    dataset = info['dataset']
+
+    d = system.distance				# m
+    Lum = 1.0					# 1
+    Lum /= d**2					# m^-2
+    Lum /= np.pi				# m^-2
+
+    step = 0.1					# Ang
+    angstroms = wavelengths*1.0e10		# Ang
+    fluxes = np.zeros(len(wavelengths))		# 1
+
+    for i, body in enumerate(system.bodies):
+
+        rv = -(system.vzi[i]*u.solRad/u.day).to('km/s').value		# km/s
+        area = np.pi*(body.requiv*u.solRad.to('m'))**2			# m^2
+        teff = body.teff						# K
+        mass = body.masses[body.ind_self]				# M_S
+        tmp = c.G*mass*u.solMass/(body.requiv*u.solRad)**2		# si
+        logg = np.log10(tmp.cgs.value)					# cgs
+        omega = body.freq_rot/u.day.to('s')				# rad/s
+        sini = body.polar_direction_xyz[2]				# 1
+        vrot = (omega*body.requiv*u.solRad.to('m')*sini)*1.0e-3		# km/s
+        z = 10.0**body.abun						# 1
+
+        props = {'teff': teff, 'logg': logg, 'z': z}
+
+        s = sg2.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
+
+        wave_ = pyterpolmini.doppler_shift(s.wave, rv)
+        intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
+        intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)	# erg s^-1 cm^-2 Ang^-1
+        intens__ *= 1.0e7							# W m^-2 m^-1
+
+        fluxes += Lum*area*intens__
+
+    return {'flux': fluxes[0]}
+
 
 def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None):
     """
