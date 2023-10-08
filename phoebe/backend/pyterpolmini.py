@@ -9,7 +9,6 @@ Reference: Brož (2017, ApJS 230, 19).
 
 """
 
-import sys
 import os
 import copy
 import numpy as np
@@ -892,6 +891,8 @@ class SyntheticGrid:
 ########################################################################
 
 def main():
+    import sys
+
     if len(sys.argv) < 6:
         print("Usage: pyterpolmini.py Teff logg metal lambda1 lambda2")
         sys.exit(1)

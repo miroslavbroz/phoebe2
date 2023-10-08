@@ -10,7 +10,6 @@ Reference: Brož (2017, ApJS 230, 19).
 
 """
 
-import sys
 import numpy as np
 from astropy import units as u
 from astropy import constants as c
@@ -21,7 +20,7 @@ sg = None
 sg2 = None
 fluxes = None
 
-def planck(T, lambda_):
+def planck(lambda_, T=None):
     """
     Planck function, i.e., black-body intensity in J s^-1 sr^-1 m^-2 m^-1 units.
 
@@ -94,12 +93,9 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
         intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
         intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)
 
-        for l in range(len(wavelengths)):
-
-            Lum_lambda = area * planck(wavelengths[l], body.teff)
-
-            fluxes[l] += Lum_lambda*intens__[l]
-            Lumtot[l] += Lum_lambda
+        Lum = planck(wavelengths, T=teff)
+        fluxes += Lum*area*intens__
+        Lumtot += Lum*area
 
     fluxes /= Lumtot
 
@@ -219,8 +215,8 @@ def sed_simple(b, system, wavelengths=None, info={}, k=None):
 
         wave_ = pyterpolmini.doppler_shift(s.wave, rv)
         intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
-        intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)	# erg s^-1 cm^-2 Ang^-1
-        intens__ *= 1.0e7							# W m^-2 m^-1
+        intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)		# erg s^-1 cm^-2 Ang^-1
+        intens__ *= 1.0e7								# W m^-2 m^-1
 
         fluxes += Lum*area*intens__
 
