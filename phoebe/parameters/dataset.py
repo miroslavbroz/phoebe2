@@ -781,7 +781,60 @@ def spe(syn=False, as_ps=True, **kwargs):
     """
     Create a <phoebe.parameters.ParameterSet> for a spectroscpic dataset.
 
-    Note: See lc().
+    Generally, this will be used as an input to the kind argument in
+    <phoebe.frontend.bundle.Bundle.add_dataset> as
+    `b.add_dataset('vis')`.  In this case, all `**kwargs` will be
+    passed on to set the values as described in the arguments below.  Alternatively,
+    see <phoebe.parameters.ParameterSet.set_value> to set/change the values
+    after creating the Parameters.
+
+    Arguments
+    ----------
+    * `syn` (bool, optional, default=False): whether to create the parameters
+        for the synthetic (model) instead of the observational (dataset).
+    * `as_ps` (bool, optional, default=True): whether to return the parameters
+        as a <phoebe.parameters.ParameterSet> instead of a list of
+        <phoebe.parameters.Parameter> objects.
+    * `times` (array/quantity, optional): observed times.
+    * `wavelengths` (array/quantity, optional): observed wavelengths (in metres).
+    * `fluxes` (array/quantity, optional): observed relative monochromatic fluxes F_nu.
+    * `sigmas` (array/quantity, optional): errors on monochromatic fluxes.
+        Only applicable if `syn` is False.
+    * `compute_times` (array/quantity, optional): times at which to compute the model.
+        Only applicable if `syn` is False.
+    * `spe_method` (string, optional, default='integrate'):
+        which method to use for computing monochromatic fluxes.
+        If 'simple', eclipse effects will not be computed.
+    * `ld_mode` (string, optional, default='interp'): mode to use for handling
+        limb-darkening.  Note that 'interp' is not available for all values
+        of `atm` (availability can be checked by calling
+        <phoebe.frontend.bundle.Bundle.run_checks> and will automatically be checked
+        during <phoebe.frontend.bundle.Bundle.run_compute>).  Only applicable
+        if `syn` is False.
+    * `ld_func` (string, optional, default='logarithmic'): function/law to use for
+        limb-darkening model. Not applicable if `ld_mode` is 'interp'.  Only
+        applicable if `syn` is False.
+    * `ld_coeffs_source` (string, optional, default='auto'): source for limb-darkening
+        coefficients ('auto' to interpolate from the applicable table according
+        to the 'atm' parameter, or the name of a specific atmosphere table).
+        Only applicable if `ld_mode` is 'lookup'.  Only applicable if
+        `syn` is False.
+    * `ld_coeffs` (list, optional): limb-darkening coefficients.  Must be of
+        the approriate length given the value of `ld_coeffs_source` which can
+        be checked by calling <phoebe.frontend.bundle.Bundle.run_checks>
+        and will automtically be checked during
+        <phoebe.frontend.bundle.Bundle.run_compute>.  Only applicable
+       if `ld_mode` is 'manual'.  Only applicable if `syn` is False.
+    * `passband` (string, optional): passband.  Only applicable if `syn` is False.
+    * `intens_weighting` (string, optional): whether passband intensities are
+        weighted by energy or photons.  Only applicable if `syn` is False.
+
+    Returns
+    --------
+    * (<phoebe.parameters.ParameterSet> or list, list): ParameterSet (if `as_ps`)
+        or list of all newly created
+        <phoebe.parameters.Parameter> objects and a list of all necessary
+        constraints.
 
     """
 
@@ -809,7 +862,61 @@ def sed(syn=False, as_ps=True, **kwargs):
     """
     Create a <phoebe.parameters.ParameterSet> for an SED dataset.
 
-    Note: See lc().
+    Generally, this will be used as an input to the kind argument in
+    <phoebe.frontend.bundle.Bundle.add_dataset> as
+    `b.add_dataset('vis')`.  In this case, all `**kwargs` will be
+    passed on to set the values as described in the arguments below.  Alternatively,
+    see <phoebe.parameters.ParameterSet.set_value> to set/change the values
+    after creating the Parameters.
+
+    Arguments
+    ----------
+    * `syn` (bool, optional, default=False): whether to create the parameters
+        for the synthetic (model) instead of the observational (dataset).
+    * `as_ps` (bool, optional, default=True): whether to return the parameters
+        as a <phoebe.parameters.ParameterSet> instead of a list of
+        <phoebe.parameters.Parameter> objects.
+    * `times` (array/quantity, optional): observed times.
+    * `wavelengths` (array/quantity, optional): observed wavelengths (in metres).
+    * `fluxes` (array/quantity, optional): observed absolute monochromatic fluxes F_nu (in W m^-2 m^-1 units).
+    * `sigmas` (array/quantity, optional): errors on monochromatic fluxes.
+        Only applicable if `syn` is False.
+    * `compute_times` (array/quantity, optional): times at which to compute the model.
+        Only applicable if `syn` is False.
+    * `sed_method` (string, optional, default='integrate'):
+        which method to use for computing monochromatic fluxes.
+        If 'simple', eclipse effects will not be computed.
+    * `ld_mode` (string, optional, default='interp'): mode to use for handling
+        limb-darkening.  Note that 'interp' is not available for all values
+        of `atm` (availability can be checked by calling
+        <phoebe.frontend.bundle.Bundle.run_checks> and will automatically be checked
+        during <phoebe.frontend.bundle.Bundle.run_compute>).  Only applicable
+        if `syn` is False.
+    * `ld_func` (string, optional, default='logarithmic'): function/law to use for
+        limb-darkening model. Not applicable if `ld_mode` is 'interp'.  Only
+        applicable if `syn` is False.
+    * `ld_coeffs_source` (string, optional, default='auto'): source for limb-darkening
+        coefficients ('auto' to interpolate from the applicable table according
+        to the 'atm' parameter, or the name of a specific atmosphere table).
+        Only applicable if `ld_mode` is 'lookup'.  Only applicable if
+        `syn` is False.
+    * `ld_coeffs` (list, optional): limb-darkening coefficients.  Must be of
+        the approriate length given the value of `ld_coeffs_source` which can
+        be checked by calling <phoebe.frontend.bundle.Bundle.run_checks>
+        and will automtically be checked during
+        <phoebe.frontend.bundle.Bundle.run_compute>.  Only applicable
+       if `ld_mode` is 'manual'.  Only applicable if `syn` is False.
+    * `passband` (string, optional): passband.  Only applicable if `syn` is False.
+    * `intens_weighting` (string, optional): whether passband intensities are
+        weighted by energy or photons.  Only applicable if `syn` is False.
+
+    Returns
+    --------
+    * (<phoebe.parameters.ParameterSet> or list, list): ParameterSet (if `as_ps`)
+        or list of all newly created
+        <phoebe.parameters.Parameter> objects and a list of all necessary
+        constraints.
+
 
     """
 
