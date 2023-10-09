@@ -1162,6 +1162,8 @@ class PhoebeBackend(BaseBackendByTime):
             # ts[i], xs[cind][i], ys[cind][i], zs[cind][i], vxs[cind][i], vys[cind][i], vzs[cind][i]
             kind = info['kind']
 
+            np.savetxt('test_phoebe16.mesh', system.meshes.get_column_flat('centers', ['starA', 'starB', 'starC']))
+
             # now check the kind to see what we need to fill
             if kind=='lp':
                 profile_func = b.get_value(qualifier='profile_func',
