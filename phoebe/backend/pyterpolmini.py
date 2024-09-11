@@ -110,8 +110,12 @@ def doppler_shift(wave, rv):
 
 def interpolate_spectrum(wave, intens, wave_):
 
-    tck = splrep(wave, intens, k=3)
-    intens_ = splev(wave_, tck) 
+    # linear
+    intens_ = np.interp(wave_, wave, intens)
+
+    # cubic splines
+    #tck = splrep(wave, intens, k=3)
+    #intens_ = splev(wave_, tck) 
 
     return intens_
 
@@ -392,7 +396,7 @@ class SyntheticSpectrum:
 
         # rotational broadening
         if vrot is not None and vrot > ZERO_TOLERANCE:
-            intens, syn_wave = rotational_broadening(syn_wave, intens, vrot, interpolate_back=False)
+            intens = rotational_broadening(syn_wave, intens, vrot)
 
         # Doppler shift
         if rv is not None and abs(rv) > ZERO_TOLERANCE:
@@ -517,6 +521,7 @@ class SyntheticGrid:
             s += str(val)
         return s
 
+#    @profile
     def get_synthetic_spectrum(self, props, wave, order=2, step=0.01, padding=20.0):
         """
         Computes a synthetic (interpolated) spectrum.
@@ -589,6 +594,7 @@ class SyntheticGrid:
             self.parameterList.append([rec[x] for x in columns_])
             self.columns = columns_
 
+#    @profile
     def get_all(self, **props):
         """
         Returns all spectra having a certain property.
@@ -602,12 +608,11 @@ class SyntheticGrid:
         spectra = []
         for spectrum in self.SyntheticSpectraList:
             for i, key in enumerate(props.keys()):
-                if key in list(spectrum.props.keys()):
-                    if (abs(props[key] - spectrum.props[key]) < ZERO_TOLERANCE):
-                        if i == (len(list(props.keys()))-1):
-                            spectra.append(spectrum)
-                    else:
-                        break
+                if (abs(props[key] - spectrum.props[key]) < ZERO_TOLERANCE):
+                    if i == (len(list(props.keys()))-1):
+                        spectra.append(spectrum)
+                else:
+                    break
 
         if len(spectra) == 0:
             warnings.warn("No eligible spectrum was found! Out of the grid?")
@@ -654,6 +659,7 @@ class SyntheticGrid:
 
         return sorted(set(l[:, col]))
 
+#    @profile
     def for_interpolation(self, parList, header, step=0.01, wmin=None, wmax=None):
         """
         Returns spectra for interpolation.
@@ -698,7 +704,7 @@ class SyntheticGrid:
                 if self.debug:
                     print("Spectrum %s does not have the wavelength scale (wmin, wmax, step)=(%s, %s, %s)" % (str(spectrum).rstrip('\n'), str(wmin), str(wmax), str(step)))
 
-            intens = spectrum.process_spectrum(only_intensity=True)
+            intens = spectrum.intens
 
             spectra.append(intens)
 
@@ -787,6 +793,7 @@ class SyntheticGrid:
 
         return spectra[np.argmin(ind)]
 
+#    @profile
     def select_parameters(self, values=[], order=2, constraints={}, **props):
         """
         Select parameters of synthetic spectra.
