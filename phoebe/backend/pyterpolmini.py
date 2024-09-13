@@ -448,7 +448,7 @@ class SyntheticSpectrum:
             wmin = self.wave.min()
         if wmax is None:
             wmax = self.wave.max()
-        if (self.wave.min() > wmin) | (self.wave.max() < wmax):
+        if (self.wave.min() > wmin+ZERO_TOLERANCE) | (self.wave.max() < wmax-ZERO_TOLERANCE):
             raise ValueError('The spectrum %s does not cover the whole spectral region <%s,%s>.' % (str(self).rstrip('\n'), str(wmin), str(wmax)))
 
         ind = np.where((self.wave >= wmin-ZERO_TOLERANCE) & (self.wave <= wmax+ZERO_TOLERANCE))[0]
