@@ -3796,8 +3796,13 @@ class ParameterSet(object):
         if dataset_param.default_unit != model_param.default_unit:
             raise ValueError("model and dataset do not have the same default_unit, cannot interpolate")
 
-        model_interp = model_param.interp_value(times=times, consider_gaussian_process=consider_gaussian_process)
-        residuals = np.asarray(dataset_param.interp_value(times=times, consider_gaussian_process=consider_gaussian_process) - model_interp)
+        # no interpolation for spectroscopy
+        if dataset_kind in ['spe', 'sed']:
+            model_interp = model_param.value
+            residuals = dataset_param.value - model_param.value
+        else:
+            model_interp = model_param.interp_value(times=times, consider_gaussian_process=consider_gaussian_process)
+            residuals = np.asarray(dataset_param.interp_value(times=times, consider_gaussian_process=consider_gaussian_process) - model_interp)
 
         if as_quantity:
             if return_interp_model:

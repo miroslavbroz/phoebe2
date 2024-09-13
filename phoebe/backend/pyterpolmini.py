@@ -109,13 +109,17 @@ def doppler_shift(wave, rv):
     return wave * (1.0 + rv*1.0e3/c.value)
 
 def interpolate_spectrum(wave, intens, wave_):
+    """
+    Fast linear interpolation
 
-    # linear
+    Note: In previous version, cubic splines were used:
+
+    tck = splrep(wave, intens, k=3)
+    intens_ = splev(wave_, tck) 
+
+    """
+
     intens_ = np.interp(wave_, wave, intens)
-
-    # cubic splines
-    #tck = splrep(wave, intens, k=3)
-    #intens_ = splev(wave_, tck) 
 
     return intens_
 
@@ -538,8 +542,8 @@ class SyntheticGrid:
         if isinstance(wave, (list, tuple)):
             wave = np.array(wave)
 
-        wmin = wave.min() - padding
-        wmax = wave.max() + padding
+        wmin = int((wave.min() - padding)/step + 0.0)*step
+        wmax = int((wave.max() + padding)/step + 1.0)*step
         self.set_wave(wmin, wmax, step)
 
         parList, vals, keys = self.verify_parameters(order=order, **props)
@@ -552,7 +556,7 @@ class SyntheticGrid:
 
     def set_wave(self, wmin, wmax, step):
 
-        n = int((wmax-wmin)/step) + 1
+        n = int((wmax-wmin)/step + 0.5) + 1
         self.wave = np.linspace(wmin, wmax, n)
 
     def read_gridlist(self, f, columns=None, directory=None, family=None):
@@ -704,6 +708,7 @@ class SyntheticGrid:
                 if self.debug:
                     print("Spectrum %s does not have the wavelength scale (wmin, wmax, step)=(%s, %s, %s)" % (str(spectrum).rstrip('\n'), str(wmin), str(wmax), str(step)))
 
+            # Note: Don't call spectrum.process_spectrum(), if it's not needed.
             intens = spectrum.intens
 
             spectra.append(intens)
