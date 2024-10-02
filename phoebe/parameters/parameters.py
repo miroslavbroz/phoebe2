@@ -10632,7 +10632,9 @@ class HierarchyParameter(StringParameter):
         except ValueError:
             for j,substructure in enumerate(structure):
                 if isinstance(substructure, list):
-                    return self._recurse_find_trace(substructure, item, trace+[j])
+                    tmp = self._recurse_find_trace(substructure, item, trace+[j])
+                    if tmp != None:
+                        return tmp
         else:
             return trace+[i]
 
@@ -10650,7 +10652,6 @@ class HierarchyParameter(StringParameter):
         """
         obj = self._bundle.filter(component=component, context='component', check_visible=False)
         our_item = '{}:{}'.format(obj.kind, component)
-
 
         repr_ = self.get_value()
         structure = self._parse_repr()
@@ -10793,9 +10794,12 @@ class HierarchyParameter(StringParameter):
         -------
         * (list of strings)
         """
-        #~ l = re.findall(r"[\w']+", self.get_value())
-        # now search for indices of orbit and take the next entry from this flat list
-        #~ return [l[i+1] for i,s in enumerate(l) if s=='orbit']
+        # NOTE: THIS LISTS ORBITS FOR 2+1 SYSTEMS IN INCORRECT ORDER!
+        # l = re.findall(r"[\w']+", self.get_value())
+        # # now search for indices of orbit and take the next entry from this flat list
+        # return [l[i+1] for i,s in enumerate(l) if s=='orbit']
+
+        # NOTE: THIS DOES NOT LIST 'ORBIT3' FOR 2+2 SYSTEMS!
         orbits = []
         for star in self.get_stars():
             parent = self.get_parent_of(star)

@@ -2770,7 +2770,7 @@ class Bundle(ParameterSet):
             # NOTE: IN ORDER TO DEFAULT_TRIPLE() WORKS
             children = self.hierarchy.get_stars_of_children_of(component)
             if len(children) > 2:
-                logger.warning('constraint {} not working for multiple systems'.format(constraint_func))
+                logger.warning('constraints teffratio, requivratio, requivsumfrac not working for multiple systems')
                 continue
 
             for constraint_func in ['teffratio', 'requivratio', 'requivsumfrac']:
