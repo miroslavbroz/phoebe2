@@ -244,7 +244,7 @@ _forbidden_labels += ['times', 'fluxes', 'sigmas', 'sigmas_lnf',
 
 # from compute:
 _forbidden_labels += ['enabled', 'dynamics_method', 'ltte', 'comments',
-                      'gr', 'stepsize', 'integrator', 'epsilon',
+                      'gr', 'stepsize', 'integrator', 'epsilon', 'geometry',
                       'irrad_method', 'boosting_method', 'mesh_method', 'distortion_method',
                       'ntriangles', 'rv_grav',
                       'mesh_offset', 'mesh_init_phi', 'horizon_method', 'eclipse_method',
@@ -10794,17 +10794,23 @@ class HierarchyParameter(StringParameter):
         -------
         * (list of strings)
         """
-        # NOTE: THIS LISTS ORBITS FOR 2+1 SYSTEMS IN INCORRECT ORDER!
+        # old version, listing orbits for 2+1 systems in incorrect order :-(
         # l = re.findall(r"[\w']+", self.get_value())
-        # # now search for indices of orbit and take the next entry from this flat list
         # return [l[i+1] for i,s in enumerate(l) if s=='orbit']
 
-        # NOTE: THIS DOES NOT LIST 'ORBIT3' FOR 2+2 SYSTEMS!
+        # adding parents of stars, in the correct order
         orbits = []
         for star in self.get_stars():
             parent = self.get_parent_of(star)
             if parent not in orbits and parent!='component' and parent is not None:
                 orbits.append(parent)
+
+        # adding also parents of orbits for 2+2 systems!
+        for orbit in orbits:
+            parent = self.get_parent_of(orbit)
+            if parent not in orbits and parent!='component' and parent is not None:
+                orbits.append(parent)
+
         return orbits
 
     def _compute_meshables(self):
