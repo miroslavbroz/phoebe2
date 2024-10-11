@@ -48,6 +48,8 @@ _can_ujson = False
 import webbrowser
 from datetime import datetime
 
+#global i_; i_ = 0  # dbg
+
 if os.getenv('PHOEBE_ENABLE_EXTERNAL_JOBS', 'FALSE').upper() == 'TRUE':
     try:
         import requests
@@ -2726,6 +2728,8 @@ class ParameterSet(object):
             of the results is exactly 1 and `force_ps=False`, otherwise the
             resulting <phoebe.parameters.ParameterSet>.
         """
+#        global i_; i_ += 1; print("parameters:2731: ", i_, " twig = ", twig, " kwargs = ", kwargs)  # dbg
+
         def _return(params, force_ps, method=None, index=None):
             if len(params) == 1 and not force_ps:
                 # then just return the parameter itself

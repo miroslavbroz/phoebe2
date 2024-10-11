@@ -1092,6 +1092,7 @@ class PhoebeBackend(BaseBackendByTime):
     def _run_single_time(self, b, i, time, infolist, **kwargs):
         logger.debug("rank:{}/{} PhoebeBackend._run_single_time(i={}, time={}, infolist={}, **kwargs.keys={})".format(mpi.myrank, mpi.nprocs, i, time, infolist, kwargs.keys()))
 
+#        print("backends.py:1095: _run_single time")  # dbg
         # unpack all backend-dependent things from the received packet
         system = kwargs.get('system')
         hier = kwargs.get('hier')
