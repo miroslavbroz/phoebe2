@@ -1363,27 +1363,27 @@ class PhoebeBackend(BaseBackendByTime):
 
                 packetlist.append(_make_packet('us',
                                               xi[cind] * u.solRad,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
                 packetlist.append(_make_packet('vs',
                                               yi[cind] * u.solRad,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
                 packetlist.append(_make_packet('ws',
                                               zi[cind] * u.solRad,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
                 packetlist.append(_make_packet('vus',
                                               vxi[cind] * u.solRad/u.d,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
                 packetlist.append(_make_packet('vvs',
                                               vyi[cind] * u.solRad/u.d,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
                 packetlist.append(_make_packet('vws',
                                               vzi[cind] * u.solRad/u.d,
-                                              time, info))
+                                              time, info, index=info['original_index']))
 
             elif kind=='mesh':
                 body = system.get_body(info['component'])
