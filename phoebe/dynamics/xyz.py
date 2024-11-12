@@ -282,6 +282,11 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
 
             elmts, euler, roche = geometry.invgeometry(masses, rb, vb, geometry=_geometry)
 
+            if conf.devel:
+                f = open("elmts.tmp", "a")
+                for j in range(0,nbod-1): np.savetxt(f, np.c_[time, j, [elmts[j,:]]])
+                f.close()
+
         fac = (1*u.AU).to(u.solRad).value
 
         xs[:,i] = fac * rb[:,0]
@@ -321,6 +326,11 @@ def _ltte(sim, j, time):
 
     if sim.t != propertime:
         sim.integrate(propertime)
+
+    if conf.devel:
+        f = open("ltte.tmp", "a")
+        np.savetxt(f, np.c_[time, j, propertime])
+        f.close()
 
     return sim.particles[j]
 
