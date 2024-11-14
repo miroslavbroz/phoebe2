@@ -2937,8 +2937,6 @@ def time_eph(b, dataset, solve_for=None, **kwargs):
     if dataset is not None:
         filterkwargs['dataset'] = dataset
 
-    print("filterkwargs = ", filterkwargs)
-
     time_ecl = b.get_parameter(qualifier='time_ecls', **filterkwargs)
     time_eph = b.get_parameter(qualifier='time_ephs', **filterkwargs)
     epoch = b.get_parameter(qualifier='epochs', **filterkwargs)

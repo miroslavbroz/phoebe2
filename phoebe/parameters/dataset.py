@@ -391,8 +391,8 @@ def etv(syn=False, as_ps=True, is_clo=True, **kwargs):
         params += [FloatParameter(qualifier='t0', value=kwargs.get('t0', 0.0), default_unit=u.d, description='Epoch for ephemeris')]
         params += [FloatParameter(qualifier='period', value=kwargs.get('period', 1.0), default_unit=u.d, description='Period for ephemeris')]
         params += [FloatParameter(qualifier='dpdt', value=kwargs.get('dpdt', 0.0), default_unit=u.d/u.d, description='Period rate for ephemeris')]
-        params += [ChoiceParameter(qualifier='comp1', value=kwargs.get('comp1', 'primary'), choices=kwargs.get('starrefs', ['']), advanced=True, description='Primary component for eclipses')]
-        params += [ChoiceParameter(qualifier='comp2', value=kwargs.get('comp2', 'secondary'), choices=kwargs.get('starrefs', ['']), advanced=True, description='Secondary component for eclipses')]
+        params += [ChoiceParameter(qualifier='comp1', value=kwargs.get('comp1', 'primary'), choices=kwargs.get('starrefs', ['primary','starA']), advanced=True, description='Primary component for eclipses')]
+        params += [ChoiceParameter(qualifier='comp2', value=kwargs.get('comp2', 'secondary'), choices=kwargs.get('starrefs', ['secondary','starB']), advanced=True, description='Secondary component for eclipses')]
 
         constraints += [(constraint.time_ecl, kwargs.get('dataset', None))]
         constraints += [(constraint.time_eph, kwargs.get('dataset', None))]
