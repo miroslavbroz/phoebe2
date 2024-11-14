@@ -12117,6 +12117,10 @@ class Bundle(ParameterSet):
                     else:
                         rv_param.set_value(rv_param.get_value(unit=u.km/u.s)+vgamma+rv_offset, ignore_readonly=True)
 
+                # Note: Model (synthetic) times of eclipses (ephemeris) must be copied ex-post!
+                for etv_param in ml_params.filter(qualifier=['time_ephs'], kind='etv', **_skip_filter_checks).to_list():
+                    etv_param.set_value(self.get_value(etv_param.twig+'@dataset'), ignore_readonly=True)
+
                 # Note: Model (synthetic) baselines and wavelengths must be copied ex-post!
                 for vis_param in ml_params.filter(qualifier=['u', 'v', 'wavelengths'], kind='vis', **_skip_filter_checks).to_list():
                     vis_param.set_value(self.get_value(vis_param.twig+'@dataset'), ignore_readonly=True)

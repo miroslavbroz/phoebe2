@@ -1325,12 +1325,6 @@ class PhoebeBackend(BaseBackendByTime):
                                               info,
                                               index=info['original_index']))
 
-                packetlist.append(_make_packet('time_ephs',
-                                              (time_eph[info['original_index']])*u.d,
-                                              time,
-                                              info,
-                                              index=info['original_index']))
-
                 packetlist.append(_make_packet('etvs',
                                               (time_ecl-time_eph[info['original_index']])*u.d,
                                               time,
