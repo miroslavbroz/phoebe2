@@ -185,9 +185,10 @@ def dynamics(times, masses, smas, eccs, incls, per0s, long_ans, mean_anoms, \
             vxs[k,i] = vb[k,0]
             vys[k,i] = vb[k,1]
             vzs[k,i] = vb[k,2]
-            ethetas[k,i] = euler[k,0]
-            elongans[k,i] = euler[k,1]
-            eincls[k,i] = euler[k,2]
+            if return_euler:
+                ethetas[k,i] = euler[k,0]
+                elongans[k,i] = euler[k,1]
+                eincls[k,i] = euler[k,2]
 
         return
 
