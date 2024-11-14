@@ -1206,7 +1206,7 @@ class PhoebeBackend(BaseBackendByTime):
                 comp1 = b.get_value(qualifier='comp1', dataset=dataset, context='dataset', **_skip_filter_checks)
                 comp2 = b.get_value(qualifier='comp2', dataset=dataset, context='dataset', **_skip_filter_checks)
                 ltte = b.get_value(qualifier='ltte', context='compute', **_skip_filter_checks)
-                etv_tol = b.get_value(qualifier='etv_tol', unit=u.d, context='compute', **_skip_filter_checks)
+                etv_tol = b.get_value(qualifier='etv_tol', unit=u.d, dataset=dataset, context='compute', **_skip_filter_checks)
 
                 cind1 = starrefs.index(comp1)
                 cind2 = starrefs.index(comp2)
