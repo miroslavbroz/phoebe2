@@ -182,6 +182,7 @@ _forbidden_labels += ['bol']
 
 # forbid all kinds
 _forbidden_labels += ['lc', 'rv', 'lp', 'sp', 'orb', 'mesh', 'vis', 'clo', 't3']
+_forbidden_labels += ['etv']
 _forbidden_labels += ['star', 'orbit', 'envelope']
 _forbidden_labels += ['spot', 'pulsation']
 _forbidden_labels += ['phoebe', 'legacy', 'jktebop', 'photodynam', 'ellc']
@@ -227,7 +228,7 @@ _forbidden_labels += ['times', 'fluxes', 'sigmas', 'sigmas_lnf',
                      'l3_mode', 'l3', 'l3_frac',
                      'exptime', 'rvs', 'wavelengths', 'rv_offset',
                      'flux_densities', 'profile_func', 'profile_rest', 'profile_sv',
-                     'Ns', 'time_ecls', 'time_ephems', 'etvs',
+                     'epochs', 'time_ecls', 'time_ephs', 'etvs',
                      'us', 'vs', 'ws', 'vus', 'vvs', 'vws',
                      'include_times', 'columns', 'coordinates',
                      'uvw_elements', 'xyz_elements',
@@ -342,7 +343,7 @@ _twig_delims = ' \t\n`~!#$%^&)-=+]{}\\|;,<>/:'
 
 _singular_to_plural = {'time': 'times', 'phase': 'phases', 'flux': 'fluxes', 'sigma': 'sigmas',
                        'rv': 'rvs', 'wavelength': 'wavelengths', 'flux_density': 'flux_densities',
-                       'time_ecl': 'time_ecls', 'time_ephem': 'time_ephems', 'N': 'Ns',
+                       'epoch': 'epochs', 'time_ecl': 'time_ecls', 'time_eph': 'time_ephs',
                        'x': 'xs', 'y': 'ys', 'z': 'zs', 'vx': 'vxs', 'vy': 'vys',
                        'vz': 'vzs', 'nx': 'nxs', 'ny': 'nys', 'nz': 'nzs',
                        'u': 'us', 'v': 'vs', 'w': 'ws', 'vu': 'vus', 'vv': 'vvs',
@@ -3733,6 +3734,8 @@ class ParameterSet(object):
             qualifier = 'fluxes'
         elif dataset_kind == 'rv':
             qualifier = 'rvs'
+        elif dataset_kind == 'etv':
+            qualifier = 'etvs'
         elif dataset_kind == 'vis':
             qualifier = 'vises'
         elif dataset_kind == 'clo':
@@ -4763,7 +4766,7 @@ class ParameterSet(object):
             defaults = {'x': 'time_ecls',
                         'y': 'etvs',
                         'z': 0}
-            sigmas_avail = ['etvs']
+            sigmas_avail = ['time_ecls']
 
         elif ps.kind in ['emcee', 'dynesty', 'lc_periodogram', 'rv_periodogram', 'lc_geometry', 'rv_geometry', 'ebai']:
             pass
@@ -5381,6 +5384,9 @@ class ParameterSet(object):
         if ps.kind in ['vis', 'clo', 't3']:
             iqualifier_default = kwargs.get('xqualifier')
 
+        if ps.kind in ['etv']:
+            iqualifier_default = 'times'
+
         iqualifier = kwargs.pop('i', iqualifier_default)
         for af_direction in ['x', 'y', 'z']:
             if ps.kind != 'mesh' and (kwargs.get('{}label'.format(af_direction), None) in ['times', 'time_ecls'] if iqualifier=='times' else [iqualifier]):
@@ -5408,16 +5414,8 @@ class ParameterSet(object):
                 else:
                     raise NotImplementedError
             elif ps.kind == 'etv':
-                if iqualfier=='times':
-                    kwargs['i'] = ps.get_quantity(qualifier='time_ecls', **_skip_filter_checks)
-                    kwargs['iqualifier'] = 'time_ecls'
-                elif iqualifier.split(':')[0] == 'phases':
-                    # TODO: need to test this
-                    icomponent = iqualifier.split(':')[1] if len(iqualifier.split(':')) > 1 else None
-                    kwargs['i'] = self._bundle.to_phase(ps.get_quantity(qualifier='time_ecls'), component=icomponent, **_skip_filter_checks)
-                    kwargs['iqualifier'] = iqualifier
-                else:
-                    raise NotImplementedError
+                kwargs['i'] = ps.get_quantity(qualifier='time_ecls', **_skip_filter_checks)
+                kwargs['iqualifier'] = 'time_ecls'
             else:
                 if iqualifier=='times':
                     kwargs['i'] = _handle_mask(ps, ps.get_quantity(qualifier='times', **_skip_filter_checks), **kwargs)

@@ -119,7 +119,7 @@ def _needs_mesh(b, dataset, kind, component, compute):
 
 def _timequalifier_by_kind(kind):
     if kind=='etv':
-        return 'time_ephems'
+        return 'time_ephs'
     else:
         return 'times'
 
@@ -221,6 +221,8 @@ def _extract_from_bundle(b, compute, dataset=None, times=None,
             # then the Parameters in the model only exist at the system-level
             # and are not tagged by component
             dataset_components = [None]
+        elif dataset_kind in ['etv']:
+            dataset_components = [None]
         elif dataset_kind in ['lp']:
             # TODO: eventually spectra and RVs as well (maybe even LCs and ORBs)
             dataset_components = b.hierarchy.get_stars() + b.hierarchy.get_orbits()
@@ -232,6 +234,8 @@ def _extract_from_bundle(b, compute, dataset=None, times=None,
                 this_times = provided_times.get(dataset)
             elif provided_times is not None and not isinstance(provided_times, dict):
                 this_times = provided_times
+            elif dataset_kind in ['etv']:
+                this_times = dataset_ps.get_value(qualifier='time_ecls', unit=u.d, **_skip_filter_checks)
             elif dataset_kind == 'mesh' and include_mesh:
                 this_times = _expand_mesh_times(b, dataset_ps, component)
             elif dataset_kind in ['lp']:
@@ -1196,7 +1200,20 @@ class PhoebeBackend(BaseBackendByTime):
             kind = info['kind']
             dataset = info['dataset']
 
+            if kind == 'etv' and dataset != previous:
+
+                time_eph = b.get_value(qualifier='time_ephs', unit=u.d, dataset=dataset, context='dataset', **_skip_filter_checks)
+                comp1 = b.get_value(qualifier='comp1', dataset=dataset, context='dataset', **_skip_filter_checks)
+                comp2 = b.get_value(qualifier='comp2', dataset=dataset, context='dataset', **_skip_filter_checks)
+                ltte = b.get_value(qualifier='ltte', context='compute', **_skip_filter_checks)
+                etv_tol = b.get_value(qualifier='etv_tol', unit=u.d, context='compute', **_skip_filter_checks)
+
+                cind1 = starrefs.index(comp1)
+                cind2 = starrefs.index(comp2)
+                previous = dataset
+
             if kind in ['vis', 'clo', 't3'] and dataset != previous:
+
                 if_method = b.get_value(qualifier='if_method', dataset=dataset, context='dataset')
                 if_method = kwargs.get('if_method', if_method)
 
@@ -1300,29 +1317,25 @@ class PhoebeBackend(BaseBackendByTime):
 
             elif kind=='etv':
 
-                # TODO: add support for other etv kinds (barycentric, robust, others?)
-                time_ecl = etvs.crossing(b, info['component'], time, dynamics_method, ltte, tol=computeparams.get_value(qualifier='etv_tol', unit=u.d, dataset=info['dataset'], component=info['component']))
-
-                this_obs = b.filter(dataset=info['dataset'], component=info['component'], context='dataset')
-
-                # TODO: there must be a better/cleaner way to get to Ns
-                packetlist.append(_make_packet('Ns',
-                                              this_obs.get_parameter(qualifier='Ns').interp_value(time_ephems=time),
-                                              time, info))
-
-                # NOTE: no longer under constraint control
-                packetlist.append(_make_packet('time_ephems',
-                                              time,
-                                              time, info))
+                time_ecl = etvs.crossing(b, time, cind1, cind2, dynamics_method=dynamics_method, ltte=ltte, tol=etv_tol)
 
                 packetlist.append(_make_packet('time_ecls',
-                                              time_ecl,
-                                              time, info))
+                                              time_ecl*u.d,
+                                              time,
+                                              info,
+                                              index=info['original_index']))
 
-                # NOTE: no longer under constraint control
+                packetlist.append(_make_packet('time_ephs',
+                                              (time_eph[info['original_index']])*u.d,
+                                              time,
+                                              info,
+                                              index=info['original_index']))
+
                 packetlist.append(_make_packet('etvs',
-                                              time_ecl-time,
-                                              time, info))
+                                              (time_ecl-time_eph[info['original_index']])*u.d,
+                                              time,
+                                              info,
+                                              index=info['original_index']))
 
             elif kind=='vis':
 

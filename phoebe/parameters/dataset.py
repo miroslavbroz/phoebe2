@@ -346,6 +346,60 @@ def rv(syn=False, as_ps=True, **kwargs):
 
     return ParameterSet(params) if as_ps else params, constraints
 
+def etv(syn=False, as_ps=True, is_clo=True, **kwargs):
+    """
+    Create a <phoebe.parameters.ParameterSet> for an eclipse timing variations dataset.
+
+    Generally, this will be used as an input to the kind argument in
+    <phoebe.frontend.bundle.Bundle.add_dataset> as
+    `b.add_dataset('vis')`.  In this case, all `**kwargs` will be
+    passed on to set the values as described in the arguments below.  Alternatively,
+    see <phoebe.parameters.ParameterSet.set_value> to set/change the values
+    after creating the Parameters.
+
+    Arguments
+    ----------
+    * `syn` (bool, optional, default=False): whether to create the parameters
+        for the synthetic (model) instead of the observational (dataset).
+    * `as_ps` (bool, optional, default=True): whether to return the parameters
+        as a <phoebe.parameters.ParameterSet> instead of a list of
+        <phoebe.parameters.Parameter> objects.
+    * `sigmas` (array/quantity, optional): errors on times of eclipses.
+        Only applicable if `syn` is False.
+
+    Returns
+    --------
+    * (<phoebe.parameters.ParameterSet> or list, list): ParameterSet (if `as_ps`)
+        or list of all newly created
+        <phoebe.parameters.Parameter> objects and a list of all necessary
+        constraints.
+
+    """
+
+    params, constraints = [], []
+
+    params += [FloatArrayParameter(qualifier='times', value=kwargs.get('times', []), required_shape=[None], readonly=syn, default_unit=u.d, description='Model (synthetic) times' if syn else 'Observed times')]
+    params += [FloatArrayParameter(qualifier='time_ecls', value=_empty_array(kwargs, 'time_ecls'), required_shape=[None] if not syn else None, readonly=syn, default_unit=u.d, description='Model (synthetic) times of eclipses' if syn else 'Observed times of eclipses')]
+    params += [FloatArrayParameter(qualifier='time_ephs', value=_empty_array(kwargs, 'time_ephs'), required_shape=[None], default_unit=u.d, description='Times of eclipses according to the ephemeris (t0, period, dpdt)')]
+    params += [FloatArrayParameter(qualifier='etvs', value=_empty_array(kwargs, 'etvs'), required_shape=[None] if not syn else None, readonly=syn, default_unit=u.d, description='Synthetic eclipse timing variations (w.r.t. ephemeris)' if syn else 'Observed eclipse timing variations (w.r.t. ephemeris)')]
+
+    if not syn:
+        params += [FloatArrayParameter(qualifier='compute_times', value=kwargs.get('compute_times', []), required_shape=[None], default_unit=u.d, description='Times to use during run_compute.  If empty, will use times parameter')]
+        params += [FloatArrayParameter(qualifier='epochs', value=_empty_array(kwargs, 'epochs'), required_shape=[None], default_unit=u.dimensionless_unscaled, description='Epochs of eclipses')]
+        params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.d, description='Uncertainties of observed times of eclipses')]
+
+        params += [FloatParameter(qualifier='t0', value=kwargs.get('t0', 0.0), default_unit=u.d, description='Epoch for ephemeris')]
+        params += [FloatParameter(qualifier='period', value=kwargs.get('period', 1.0), default_unit=u.d, description='Period for ephemeris')]
+        params += [FloatParameter(qualifier='dpdt', value=kwargs.get('dpdt', 0.0), default_unit=u.d/u.d, description='Period rate for ephemeris')]
+        params += [ChoiceParameter(qualifier='comp1', value=kwargs.get('comp1', 'primary'), choices=kwargs.get('starrefs', ['']), advanced=True, description='Primary component for eclipses')]
+        params += [ChoiceParameter(qualifier='comp2', value=kwargs.get('comp2', 'secondary'), choices=kwargs.get('starrefs', ['']), advanced=True, description='Secondary component for eclipses')]
+
+        constraints += [(constraint.time_ecl, kwargs.get('dataset', None))]
+        constraints += [(constraint.time_eph, kwargs.get('dataset', None))]
+        constraints += [(constraint.etv, kwargs.get('dataset', None))]
+
+    return ParameterSet(params) if as_ps else params, constraints
+
 def lp(syn=False, as_ps=True, **kwargs):
     """
     Create a <phoebe.parameters.ParameterSet> for a line profile dataset.

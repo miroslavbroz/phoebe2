@@ -2893,86 +2893,100 @@ def parallax(b, solve_for=None, **kwargs):
 
     return lhs, rhs, [], {}
 
-# _validsolvefor['time_ephem'] = ['time_ephem']
-# def time_ephem(b, component, dataset, solve_for=None, **kwargs):
-#     """
-#     use the ephemeris of component to predict the expected times of eclipse (used
-#         in the ETV dataset)
-#
-#     This is usually passed as an argument to
-#      <phoebe.frontend.bundle.Bundle.add_constraint>.
-#     """
-#     hier = b.get_hierarchy()
-#     if not len(hier.get_value()):
-#         # TODO: change to custom error type to catch in bundle.add_component
-#         # TODO: check whether the problem is 0 hierarchies or more than 1
-#         raise NotImplementedError("constraint for time_ecl requires hierarchy")
-#
-#     if component=='_default':
-#         # need to do this so that the constraint won't fail before being copied
-#         parentorbit = hier.get_top()
-#     else:
-#         parentorbit = hier.get_parent_of(component)
-#
-#     parentorbit_ps = _get_system_ps(b, parentorbit)
-#
-#     filterwargs = _skip_filter_checks
-#     if component is not None:
-#         filterwargs['component'] = component
-#     if dataset is not None:
-#         filterwargs['dataset'] = dataset
-#
-#     time_ephem = b.get_parameter(qualifier='time_ephems', **filterwargs)
-#     t0 = parentorbit_ps.get_parameter(qualifier='t0_supconj', **_skip_filter_checks)  # TODO: make sure t0_supconj makes sense here
-#     period = parentorbit_ps.get_parameter(qualifier='period', **_skip_filter_checks)
-#     phshift = parentorbit_ps.get_parameter(qualifier='phshift', **_skip_filter_checks)
-#     dpdt = parentorbit_ps.get_parameter(qualifier='dpdt', **_skip_filter_checks)
-#     esinw_ = parentorbit_ps.get_parameter(qualifier='esinw', **_skip_filter_checks)
-#
-#     N = b.get_parameter(qualifier='Ns', **filterwargs)
-#
-#     if solve_for in [None, time_ephem]:
-#
-#         # TODO: N is always an int, but we want to include the expected phase of eclipse (ie N+ph_ecl) based on which component and esinw/ecosw
-#         # then we can have bundle.add_component automatically default to add all components instead of just the primary
-#
-#         # same as Bundle.to_time except phase can be > 1
-#         lhs = time_ephem
-#         # we have to do a trick here since dpdt is in sec/yr and floats are
-#         # assumed to have the same unit during subtraction or addition.
-#         one = 1.0*(u.s/u.s)
-#         if component!='_default' and hier.get_primary_or_secondary(component)=='secondary':
-#             # TODO: make sure this constraint updates if the hierarchy changes?
-#             N = N + 0.5 + esinw_  # TODO: check this
-#         rhs = t0 + ((N - phshift) * period) / (-1 * (N - phshift) * dpdt + one)
-#         #rhs = (N-phshift)*period
-#     else:
-#         raise NotImplementedError
-#
-#     return lhs, rhs, [], {'component': component, 'dataset': dataset}
-#
-# def etv(b, component, dataset, solve_for=None, **kwargs):
-#     """
-#     compute the ETV column from the time_ephem and time_ecl columns (used in the
-#         ETV dataset).
-#
-#     This is usually passed as an argument to
-#      <phoebe.frontend.bundle.Bundle.add_constraint>.
-#     """
-#
-#     time_ephem = b.get_parameter(qualifier='time_ephems', component=component, dataset=dataset, context=['dataset', 'model'])  # need to provide context to avoid getting the constraint
-#     time_ecl = b.get_parameter(qualifier='time_ecls', component=component, dataset=dataset)
-#     etv = b.get_parameter(qualifier='etvs', component=component, dataset=dataset)
-#
-#     if solve_for in [None, etv]:
-#         lhs = etv
-#         rhs = time_ecl - time_ephem
-#     else:
-#         raise NotImplementedError
-#
-#     return lhs, rhs, [], {'component': component, 'dataset': dataset}
 
-#}
+_validsolvefor['time_ecl'] = ['time_ecl']
+def time_ecl(b, dataset, solve_for=None, **kwargs):
+    """
+    Copy the times column to the times_ecls column.
+
+    This is usually passed as an argument to
+     <phoebe.frontend.bundle.Bundle.add_constraint>.
+    """
+
+    filterkwargs = _skip_filter_checks
+    filterkwargs['context'] = 'dataset'
+    if dataset is not None:
+        filterkwargs['dataset'] = dataset
+
+    time = b.get_parameter(qualifier='times', **filterkwargs)
+    time_ecl = b.get_parameter(qualifier='time_ecls', **filterkwargs)
+
+    # NOTE: '=' is not implemented, one must use "= 1.*"
+
+    if solve_for in [None, time_ecl]:
+        lhs = time_ecl
+        rhs = 1.*time
+    else:
+        raise NotImplementedError
+
+    return lhs, rhs, [], {'dataset': dataset}
+
+
+_validsolvefor['time_eph'] = ['time_eph']
+def time_eph(b, dataset, solve_for=None, **kwargs):
+    """
+    Use the ephemeris supplied with the dataset (sic!) to predict
+    the expected times of eclipse (used in the ETV dataset).
+
+    This is usually passed as an argument to
+     <phoebe.frontend.bundle.Bundle.add_constraint>.
+    """
+
+    filterkwargs = _skip_filter_checks
+    filterkwargs['context'] = ['dataset']
+    if dataset is not None:
+        filterkwargs['dataset'] = dataset
+
+    print("filterkwargs = ", filterkwargs)
+
+    time_ecl = b.get_parameter(qualifier='time_ecls', **filterkwargs)
+    time_eph = b.get_parameter(qualifier='time_ephs', **filterkwargs)
+    epoch = b.get_parameter(qualifier='epochs', **filterkwargs)
+    t0 = b.get_parameter(qualifier='t0', **filterkwargs)
+    period = b.get_parameter(qualifier='period', **filterkwargs)
+    dpdt = b.get_parameter(qualifier='dpdt', **filterkwargs)
+
+    # we have to do a trick here since dpdt is in sec/yr and floats are
+    # assumed to have the same unit during subtraction or addition.
+    one = 1.0*(u.s/u.s)
+
+    if solve_for in [None, time_eph]:
+        lhs = time_eph
+        rhs = t0 + (epoch*period) / (-1.*epoch*dpdt + one)
+    else:
+        raise NotImplementedError
+
+    return lhs, rhs, [], {'dataset': dataset}
+
+
+def etv(b, dataset, solve_for=None, **kwargs):
+    """
+    Compute the ETV column from the time_eph and time_ecl columns
+    (used in the ETV dataset).
+
+    This is usually passed as an argument to
+     <phoebe.frontend.bundle.Bundle.add_constraint>.
+    """
+
+    filterkwargs = _skip_filter_checks
+    filterkwargs['context'] = ['dataset']
+    if dataset is not None:
+        filterkwargs['dataset'] = dataset
+
+    time_ecl = b.get_parameter(qualifier='time_ecls', **filterkwargs)
+    time_eph = b.get_parameter(qualifier='time_ephs', **filterkwargs)
+    etv = b.get_parameter(qualifier='etvs', **filterkwargs)
+
+    # NOTE: '-' is not implemented, one must use "-1.*"
+
+    if solve_for in [None, etv]:
+        lhs = etv
+        rhs = time_ecl + (-1.*time_eph)
+    else:
+        raise NotImplementedError
+
+    return lhs, rhs, [], {'dataset': dataset}
+
 
 def requiv_to_pot(b, component, solve_for=None, **kwargs):
     """

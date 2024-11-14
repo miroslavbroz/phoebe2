@@ -6587,6 +6587,7 @@ class Bundle(ParameterSet):
         <phoebe.list_available_datasets> and include:
         * <phoebe.parameters.dataset.lc>
         * <phoebe.parameters.dataset.rv>
+        * <phoebe.parameters.dataset.etv>
         * <phoebe.parameters.dataset.lp>
         * <phoebe.parameters.dataset.orb>
         * <phoebe.parameters.dataset.mesh>
@@ -6712,12 +6713,7 @@ class Bundle(ParameterSet):
             # TODO: how will this work when changing hierarchy to add/remove the common envelope?
             default_components = allowed_components
         elif kind in ['etv']:
-            hier = self.hierarchy
-            stars = hier.get_stars()
-            # only include components in which the sibling is also a star that
-            # means that the companion in a triple cannot be timed, because how
-            # do we know who it's eclipsing?
-            allowed_components = [s for s in stars if hier.get_sibling_of(s) in stars]
+            allowed_components = [None]
             default_components = allowed_components
         elif kind in ['lp']:
             # TODO: need to think about what this should be for contacts...
