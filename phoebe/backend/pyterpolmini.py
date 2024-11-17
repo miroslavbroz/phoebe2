@@ -65,22 +65,26 @@ grid_dict_ABS = dict(
     identification=[
         'default',
         'pollux',
+        'ostar',
         'bstar',
         'phoenix',
         ],
     directories=[
         ['OSTAR_Z_1.0', 'BSTAR_Z_1.0', 'PHOENIX_Z_1.0'],
         ['POLLUX_Z_1.0'],
+        ['OSTAR_Z_1.0'],
         ['BSTAR_Z_1.0'],
         ['PHOENIX_Z_1.0'],
         ],
     families=[
         ['ostar', 'bstar', 'phoenix'],
         ['pollux'],
+        ['ostar'],
         ['bstar'],
         ['phoenix'],
         ],
     columns=[
+        ['filename', 'teff', 'logg', 'z'],
         ['filename', 'teff', 'logg', 'z'],
         ['filename', 'teff', 'logg', 'z'],
         ['filename', 'teff', 'logg', 'z'],
