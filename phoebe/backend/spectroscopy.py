@@ -14,7 +14,7 @@ import numpy as np
 from astropy import units as u
 from astropy import constants as c
 
-from phoebe.backend import pyterpolmini
+from phoebe.backend import pyterpolmu
 
 sg = None
 sg2 = None
@@ -50,7 +50,7 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg is None:
-        sg = pyterpolmini.SyntheticGrid(flux_type='relative', debug=False)
+        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist', debug=False)
 
     j = info['original_index']
     if k > 0:
@@ -77,21 +77,13 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
         vrot = (omega*body.requiv*u.solRad.to('m')*sini)*1.0e-3		# km/s
         z = 10.0**body.abun						# 1
 
-#        print("rv = ", rv)
-#        print("teff = ", teff)
-#        print("logg = ", logg)
-#        print("omega = ", omega)
-#        print("sini = ", sini)
-#        print("vrot = ", vrot)
-#        print("z = ", z)
+        props = [teff, logg, z]
 
-        props = {'teff': teff, 'logg': logg, 'z': z}
+        s = sg.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
-        s = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
-
-        wave_ = pyterpolmini.doppler_shift(s.wave, rv)
-        intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
-        intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)
+        wave_ = pyterpolmu.doppler_shift(s.wave, rv)
+        intens_ = pyterpolmu.rotational_broadening(wave_, s.intens, vrot)
+        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)
 
         Lum = planck(wavelengths, T=teff)
         fluxes += Lum*area*intens__
@@ -116,7 +108,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg is None:
-        sg = pyterpolmini.SyntheticGrid(flux_type='relative', debug=False)
+        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist', debug=False)
 
     j = info['original_index']
     if k > 0:
@@ -150,13 +142,13 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
         if Lum[i] == 0.0:
             continue
 
-        props = {'teff': teffs[i], 'logg': loggs[i], 'z': zs[i]}
+        props = [teffs[i], loggs[i], zs[i]]
 
-        s = sg.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
+        s = sg.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
         rv = rvs[i]*1.0e-3							# km/s
-        wave_ = pyterpolmini.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmini.interpolate_spectrum(wave_, s.intens, angstroms)	# 1
+        wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
+        intens_ = pyterpolmu.interpolate_spectrum(wave_, s.intens, angstroms)	# 1
 
         fluxes += Lum[i]*intens_
 
@@ -178,7 +170,7 @@ def sed_simple(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg2 is None:
-        sg2 = pyterpolmini.SyntheticGrid(flux_type='absolute', debug=False)
+        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS', debug=False)
 
     j = info['original_index']
     if k > 0:
@@ -209,13 +201,13 @@ def sed_simple(b, system, wavelengths=None, info={}, k=None):
         vrot = (omega*body.requiv*u.solRad.to('m')*sini)*1.0e-3		# km/s
         z = 10.0**body.abun						# 1
 
-        props = {'teff': teff, 'logg': logg, 'z': z}
+        props = [teff, logg, z]
 
-        s = sg2.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
+        s = sg2.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
-        wave_ = pyterpolmini.doppler_shift(s.wave, rv)
-        intens_ = pyterpolmini.rotational_broadening(wave_, s.intens, vrot)
-        intens__ = pyterpolmini.interpolate_spectrum(wave_, intens_, angstroms)		# erg s^-1 cm^-2 Ang^-1
+        wave_ = pyterpolmu.doppler_shift(s.wave, rv)
+        intens_ = pyterpolmu.rotational_broadening(wave_, s.intens, vrot)
+        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)		# erg s^-1 cm^-2 Ang^-1
         intens__ *= 1.0e7								# W m^-2 m^-1
 
         fluxes += Lum*area*intens__
@@ -234,7 +226,7 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     global fluxes
 
     if sg2 is None:
-        sg2 = pyterpolmini.SyntheticGrid(flux_type='absolute', debug=False)
+        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS', debug=False)
 
     j = info['original_index']
     if k > 0:
@@ -273,13 +265,13 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
         if Lum[i] == 0.0:
             continue
 
-        props = {'teff': teffs[i], 'logg': loggs[i], 'z': zs[i]}
+        props = [teffs[i], loggs[i], zs[i]]
 
-        s = sg2.get_synthetic_spectrum(props, angstroms, order=2, step=step, padding=20.0)
+        s = sg2.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
         rv = rvs[i]*1.0e-3							# km/s
-        wave_ = pyterpolmini.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmini.interpolate_spectrum(wave_, s.intens, angstroms)	# erg s^-1 cm^-2 Ang^-1 
+        wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
+        intens_ = pyterpolmu.interpolate_spectrum(wave_, s.intens, angstroms)	# erg s^-1 cm^-2 Ang^-1 
         intens_ *= 1.0e7							# W m^-2 m^-1
 
         fluxes += Lum[i]*intens_
