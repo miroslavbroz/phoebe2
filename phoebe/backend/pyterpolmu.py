@@ -140,6 +140,7 @@ def rotational_broadening(wave, intens, vrot, epsilon=0.6):
     intens = interpolate_spectrum(wave_conv, 1.0-intens_conv, wave)
     return intens
 
+
 class Spectrum():
     """A synthetic spectrum."""
 
@@ -187,11 +188,31 @@ class Spectrum():
         header = "wave intens"
         np.savetxt(f, np.column_stack([self.wave, self.intens]), fmt=fmt, header=header)
 
+    def truncate_spectrum(self, wmin=None, wmax=None):
+        """
+        Truncates a spectrum.
+
+        :param wmin: minimum wavelength
+        :param wmax: maximum wavelength
+        """
+        if wmin==None or wmax==None:
+            return
+
+        n = len(self.wave)
+        w1 = self.wave[0]
+        w2 = self.wave[-1]
+
+        i = int((wmin-w1)/(w2-w1)*n + 0.0)
+        j = int((wmax-w1)/(w2-w1)*n + 0.5)
+
+        self.wave = self.wave[i:j]
+        self.intens = self.intens[i:j]
+
 
 class SyntheticGrid():
     """A grid of synthetic spectra."""
 
-    def __init__(self, gridlist='gridlist'):
+    def __init__(self, gridlist='gridlist', wmin=None, wmax=None):
         """
         Setup the grid.
 
@@ -205,6 +226,7 @@ class SyntheticGrid():
         # read wave's (cf. allocation below)
         s = Spectrum()
         s.load_spectrum(self.files[0])
+        s.truncate_spectrum(wmin, wmax)
         self.wave = s.wave
 
         # read teffs, loggs -> N x M grid
@@ -229,6 +251,7 @@ class SyntheticGrid():
 
                 s = Spectrum()
                 s.load_spectrum(filename)
+                s.truncate_spectrum(wmin, wmax)
 
                 grid[i, j, :] = s.intens
 
@@ -251,8 +274,8 @@ class SyntheticGrid():
         props = np.array([props])
         wave = np.array(wave)
 
-        wmin = int((wave.min() - padding)/step + 0.0)*step
-        wmax = int((wave.max() + padding)/step + 0.5)*step
+#        wmin = int((wave.min() - padding)/step + 0.0)*step
+#        wmax = int((wave.max() + padding)/step + 0.5)*step
 
         interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='linear')
 
@@ -260,22 +283,15 @@ class SyntheticGrid():
         s.wave = self.wave
         s.intens = interps['interps'][0]
 
-        w1 = s.wave[0]
-        w2 = s.wave[-1]
-        i = int((wmin-w1)/(w2-w1)*len(s.wave) + 0.0)
-        j = int((wmax-w1)/(w2-w1)*len(s.wave) + 0.5)
-        s.wave = s.wave[i:j]
-        s.intens = s.intens[i:j]
-
         return s
 
 def main():
-    sg = SyntheticGrid()
-
     teff = 6000.0
     logg = 4.25
     wmin = 6500.0
     wmax = 6600.0
+
+    sg = SyntheticGrid(wmin=wmin, wmax=wmax)
 
     s = sg.get_synthetic_spectrum([teff, logg], [wmin, wmax], padding=0.0)
 
