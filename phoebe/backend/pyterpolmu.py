@@ -236,7 +236,7 @@ class SyntheticGrid():
         for i in range(len(a)):
             tmp = np.unique(a[i])
             if len(tmp) < 2:
-                tmp = np.array((tmp[0], tmp[0]))
+                tmp = np.array((tmp[0], tmp[0]+ZERO_TOLERANCE))
             b.append(tmp)
         b = np.array(b, dtype=object)
         c = np.arange(0,len(a[0]))
