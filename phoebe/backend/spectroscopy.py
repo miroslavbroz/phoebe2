@@ -50,7 +50,7 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg is None:
-        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist', debug=False)
+        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist')
 
     j = info['original_index']
     if k > 0:
@@ -108,7 +108,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg is None:
-        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist', debug=False)
+        sg = pyterpolmu.SyntheticGrid(gridlist='gridlist')
 
     j = info['original_index']
     if k > 0:
@@ -170,7 +170,7 @@ def sed_simple(b, system, wavelengths=None, info={}, k=None):
     global fluxes
 
     if sg2 is None:
-        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS', debug=False)
+        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS')
 
     j = info['original_index']
     if k > 0:
@@ -226,7 +226,7 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     global fluxes
 
     if sg2 is None:
-        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS', debug=False)
+        sg2 = pyterpolmu.SyntheticGrid(gridlist='gridlist_ABS')
 
     j = info['original_index']
     if k > 0:
