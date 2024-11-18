@@ -230,10 +230,14 @@ class SyntheticGrid():
         self.wave = s.wave
 
         # read teffs, loggs -> N x M grid
+        # Note: One needs to have 2 values of z!
         a = np.loadtxt(gridlist, usecols=[1, 2, 3], unpack=True)
         b = []
         for i in range(len(a)):
-            b.append(np.unique(a[i]))
+            tmp = np.unique(a[i])
+            if len(tmp) < 2:
+                tmp = np.array((tmp[0], tmp[0]))
+            b.append(tmp)
         b = np.array(b, dtype=object)
         c = np.arange(0,len(a[0]))
 
