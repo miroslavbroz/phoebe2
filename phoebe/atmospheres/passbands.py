@@ -2212,7 +2212,8 @@ class Passband:
         mu[np.isclose(mu, 1)] = 1-1e-12
         mu[np.isclose(mu, 0)] = 1e-12
 
-        self.lds = None
+        # default limb darkening function values (==1)
+        self.lds = np.ones(len(mu))
 
         if ld_func == 'interp':
             # The 'interp' LD function works only for model atmospheres:

@@ -11,7 +11,6 @@ Reference: Brož (2017, ApJS 230, 19).
 
 """
 
-import sys
 import os
 import numpy as np
 import ndpolator
