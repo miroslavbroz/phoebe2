@@ -258,7 +258,7 @@ class SyntheticGrid():
                     grid[i, j, k, :] = s.intens
 
         # ndpolator instance
-        self.ndp = ndpolator.Ndpolator(basic_axes=(b[0], b[1]))
+        self.ndp = ndpolator.Ndpolator(basic_axes=(b[0], b[1], b[2]))
         self.ndp.register(table='main', grid=grid, associated_axes=None)
 
     def get_synthetic_spectrum(self, props, wave, step=0.01, padding=20.0):
