@@ -1916,6 +1916,8 @@ class Star(Body):
                                      ld_coeffs=ld_coeffs,
                                      photon_weighted=intens_weighting=='photon')
 
+            # Note: One also needs limb darkening per-triangle (for spectroscopy).
+            lds = pb.lds
 
             # Beaming/boosting
             if boosting_method == 'none' or ignore_effects:
@@ -1974,6 +1976,7 @@ class Star(Body):
                 'abs_intensities': abs_intensities,
                 'intensities': intensities,
                 'ldint': ldint,
+                'lds': lds,
                 'boost_factors': boost_factors}
 
 

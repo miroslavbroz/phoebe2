@@ -30,6 +30,7 @@ def planck(lambda_, T=None):
     k_B = c.k_B.value
     return 2.0*h*c_**2/lambda_**5 / (np.exp(h*c_/(lambda_*k_B*T))-1.0)
 
+
 def spe_simple(b, system, wavelengths=None, info={}, k=None):
     """
     Compute relative monochromatic flux F_nu.
@@ -124,6 +125,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
         return {'flux': np.nan}
 
     # Note: intensity should be per-wavelength!
+    # Note: intensity includes limb darkening (as passband)
     abs_intensities = meshes.get_column_flat('abs_intensities:{}'.format(dataset), components)
     mus = meshes.get_column_flat('mus', components)
     areas = meshes.get_column_flat('areas_si', components)
@@ -243,13 +245,14 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
 
     mus = meshes.get_column_flat('mus', components)
     areas = meshes.get_column_flat('areas_si', components)
+    lds = meshes.get_column_flat("lds:{}".format(dataset), components)
     rvs = (meshes.get_column_flat("rvs:{}".format(dataset), components)*u.solRad/u.d).to(u.m/u.s).value
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
 
     d = system.distance				# m
-    Lum = areas*mus*visibilities		# m^2
+    Lum = lds*areas*mus*visibilities		# m^2
     Lum /= d**2					# 1
 
     # Note: a factor 1/pi is needed to obtain the solar values:
