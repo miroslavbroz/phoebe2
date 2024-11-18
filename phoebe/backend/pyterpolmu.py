@@ -230,30 +230,32 @@ class SyntheticGrid():
         self.wave = s.wave
 
         # read teffs, loggs -> N x M grid
-        a = np.loadtxt(gridlist, usecols=[1, 2], unpack=True)
+        a = np.loadtxt(gridlist, usecols=[1, 2, 3], unpack=True)
         b = []
         for i in range(len(a)):
             b.append(np.unique(a[i]))
         b = np.array(b, dtype=object)
         c = np.arange(0,len(a[0]))
 
-        grid = np.empty((len(b[0]), len(b[1]), len(self.wave))) * np.nan
+        grid = np.empty((len(b[0]), len(b[1]), len(b[2]), len(self.wave))) * np.nan
 
         # assign intens's <- cf. "voids"!
         for i in range(len(b[0])):
             for j in range(len(b[1])):
-                i_ = np.where(a[0] == b[0][i])[0]
-                j_ = np.where(a[1][i_] == b[1][j])[0]
-                k_ = c[i_][j_]
-                if len(k_) == 0:
-                    continue
-                filename = self.files[k_][0]
+                for k in range(len(b[2])):
+                    i_ = np.where(a[0] == b[0][i])[0]
+                    j_ = np.where(a[1][i_] == b[1][j])[0]
+                    k_ = np.where(a[2][i_][j_] == b[2][k])[0]
+                    l_ = c[i_][j_][k_]
+                    if len(l_) == 0:
+                        continue
+                    filename = self.files[l_][0]
 
-                s = Spectrum()
-                s.load_spectrum(filename)
-                s.truncate_spectrum(wmin, wmax)
+                    s = Spectrum()
+                    s.load_spectrum(filename)
+                    s.truncate_spectrum(wmin, wmax)
 
-                grid[i, j, :] = s.intens
+                    grid[i, j, k, :] = s.intens
 
         # ndpolator instance
         self.ndp = ndpolator.Ndpolator(basic_axes=(b[0], b[1]))
@@ -265,7 +267,7 @@ class SyntheticGrid():
 
         Cf. SyntheticSpectrum().
 
-        :param props: an array of values (teff, logg), at which to interpolate
+        :param props: an array of values (teff, logg, z), at which to interpolate
         :param wave: wavelengths in A
         :param step: step in A
         :param padding: padding in A
@@ -273,9 +275,6 @@ class SyntheticGrid():
         """
         props = np.array([props])
         wave = np.array(wave)
-
-#        wmin = int((wave.min() - padding)/step + 0.0)*step
-#        wmax = int((wave.max() + padding)/step + 0.5)*step
 
         interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='linear')
 
@@ -288,6 +287,7 @@ class SyntheticGrid():
 def main():
     teff = 6000.0
     logg = 4.25
+    z = 1.0
     wmin = 6500.0
     wmax = 6600.0
 
