@@ -104,6 +104,8 @@ def rotational_broadening(wave, intens, vrot, epsilon=0.6):
     :param epsilon: coefficient of linear limb-darkening
     :return intens: the rotated spectrum
 
+    Reference: Diaz et al. (2011, A&A 531, A143).
+
     """
     if vrot < ZERO_TOLERANCE:
         return intens
@@ -248,7 +250,7 @@ class SyntheticGrid():
                 for k in range(len(b[2])):
                     i_ = np.where(a[0] == b[0][i])[0]
                     j_ = np.where(a[1][i_] == b[1][j])[0]
-                    k_ = np.where(a[2][i_][j_] == b[2][k])[0]
+                    k_ = np.where(abs(a[2][i_][j_] - b[2][k]) <= ZERO_TOLERANCE)[0]
                     l_ = c[i_][j_][k_]
                     if len(l_) == 0:
                         continue
@@ -279,7 +281,7 @@ class SyntheticGrid():
         props = np.array([props])
         wave = np.array(wave)
 
-        interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='linear')
+        interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='nearest')
 
         s = Spectrum()
         s.wave = self.wave
