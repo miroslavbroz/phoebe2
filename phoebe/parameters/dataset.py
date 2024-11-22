@@ -805,6 +805,7 @@ def spe(syn=False, as_ps=True, **kwargs):
     * `spe_method` (string, optional, default='integrate'):
         which method to use for computing monochromatic fluxes.
         If 'simple', eclipse effects will not be computed.
+    * `fwhm` (float, optional, default=0.0): instrumental broadening (FWHM).
     * `ld_mode` (string, optional, default='interp'): mode to use for handling
         limb-darkening.  Note that 'interp' is not available for all values
         of `atm` (availability can be checked by calling
@@ -849,6 +850,7 @@ def spe(syn=False, as_ps=True, **kwargs):
         params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.dimensionless_unscaled, description='Observed uncertainty of flux')]
 
     params += [ChoiceParameter(qualifier='spe_method', value=kwargs.get('spe_method', 'integrate'), choices=['integrate', 'simple'], description='Method to use for computing synthetic spectra (must be integrate for eclipse effects)')]
+    params += [FloatParameter(qualifier='fwhm', value=kwargs.get('fwhm', 0.0), default_unit=u.angstrom, limits=(0, None), description='Instrumental broadening (FWHM)')]
 
     lc_params, lc_constraints = lc(syn=syn, as_ps=False, is_lc=False, **kwargs)
     params += lc_params
@@ -886,6 +888,7 @@ def sed(syn=False, as_ps=True, **kwargs):
     * `sed_method` (string, optional, default='integrate'):
         which method to use for computing monochromatic fluxes.
         If 'simple', eclipse effects will not be computed.
+    * `fwhm` (float, optional, default=0.0): instrumental broadening (FWHM).
     * `ld_mode` (string, optional, default='interp'): mode to use for handling
         limb-darkening.  Note that 'interp' is not available for all values
         of `atm` (availability can be checked by calling
@@ -931,6 +934,7 @@ def sed(syn=False, as_ps=True, **kwargs):
         params += [FloatArrayParameter(qualifier='sigmas', value=_empty_array(kwargs, 'sigmas'), required_shape=[None], default_unit=u.W/u.m**3, description='Observed uncertainty of flux')]
 
     params += [ChoiceParameter(qualifier='sed_method', value=kwargs.get('sed_method', 'integrate'), choices=['integrate', 'simple'], description='Method to use for computing synthetic spectra (must be integrate for eclipse effects)')]
+    params += [FloatParameter(qualifier='fwhm', value=kwargs.get('fwhm', 0.0), default_unit=u.angstrom, limits=(0, None), description='Instrumental broadening (FWHM)')]
 
     lc_params, lc_constraints = lc(syn=syn, as_ps=False, is_lc=False, **kwargs)
     params += lc_params

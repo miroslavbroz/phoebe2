@@ -118,6 +118,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     meshes = system.meshes
     components = info['component']
     dataset = info['dataset']
+    fwhm = info['fwhm']
 
     visibilities = meshes.get_column_flat('visibilities', components)
 
@@ -150,7 +151,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
 
         rv = rvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, 0.25)	# 1
+        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, fwhm)	# 1
         intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# 1
 
         fluxes += Lum[i]*intens__
@@ -244,6 +245,7 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     meshes = system.meshes
     components = info['component']
     dataset = info['dataset']
+    fwhm = info['fwhm']
 
     visibilities = meshes.get_column_flat('visibilities', components)
 
@@ -281,7 +283,7 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
 
         rv = rvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, 0.25)
+        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, fwhm)
         intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# erg s^-1 cm^-2 Ang^-1
         intens__ *= 1.0e7							# W m^-2 m^-1
 

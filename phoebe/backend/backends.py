@@ -1180,13 +1180,20 @@ class PhoebeBackend(BaseBackendByTime):
             dataset = info['dataset']
 
             # save wavelengths (for spectroscopy)
+            if kind in ['spe', 'sed'] and dataset != previous:
+
+                wavelengths = b.get_value(qualifier='wavelengths', dataset=dataset, context='dataset', **_skip_filter_checks)
+                fwhm = b.get_value(qualifier='fwhm', dataset=dataset, context='dataset', **_skip_filter_checks)
+
+                info['fwhm'] = fwhm
+
             if kind == 'spe' and dataset != previous:
-                wavelengths = b.get_value(qualifier='wavelengths', dataset=dataset, context='dataset')
                 previous = dataset
                 k = 0
 
                 spe_method = b.get_value(qualifier='spe_method', dataset=dataset, context='dataset')
                 spe_method = kwargs.get('spe_method', spe_method)
+
                 if spe_method == 'integrate':
                     spectroscopy.spe = spectroscopy.spe_integrate
                 elif spe_method == 'simple':
@@ -1195,12 +1202,12 @@ class PhoebeBackend(BaseBackendByTime):
                     raise NotImplementedError("spe_method='{}' not supported".format(spe_method))
 
             elif kind == 'sed' and dataset != previous:
-                wavelengths = b.get_value(qualifier='wavelengths', dataset=dataset, context='dataset')
                 previous = dataset
                 k = 0
 
                 sed_method = b.get_value(qualifier='sed_method', dataset=dataset, context='dataset')
                 sed_method = kwargs.get('sed_method', sed_method)
+
                 if sed_method == 'integrate':
                     spectroscopy.sed = spectroscopy.sed_integrate
                 elif sed_method == 'simple':
