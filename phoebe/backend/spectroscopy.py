@@ -11,9 +11,9 @@ Reference: Brož (2017, ApJS 230, 19).
 """
 
 import numpy as np
-from astropy import units as u
-from astropy import constants as c
 
+from phoebe import u, c
+from phoebe import conf
 from phoebe.backend import pyterpolmu
 
 sg = None
@@ -82,9 +82,9 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
 
         s = sg.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
-        wave_ = pyterpolmu.doppler_shift(s.wave, rv)
-        intens_ = pyterpolmu.rotational_broadening(wave_, s.intens, vrot)
-        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)
+        wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
+        intens_ = pyterpolmu.rotational_broadening(wave_, s.intens, vrot)	# 1
+        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# 1
 
         Lum = planck(wavelengths, T=teff)
         fluxes += Lum*area*intens__
@@ -150,9 +150,16 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
 
         rv = rvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmu.interpolate_spectrum(wave_, s.intens, angstroms)	# 1
+        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, 0.25)	# 1
+        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# 1
 
-        fluxes += Lum[i]*intens_
+        fluxes += Lum[i]*intens__
+
+        if conf.devel:
+            f = open("spectroscopy.tmp", "a")
+            np.savetxt(f, np.c_[len(angstroms)*[i], angstroms, intens__])
+            f.write("\n")
+            f.close()
 
     Lumtot = np.sum(Lum)
     fluxes /= Lumtot
@@ -274,10 +281,11 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
 
         rv = rvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmu.interpolate_spectrum(wave_, s.intens, angstroms)	# erg s^-1 cm^-2 Ang^-1 
-        intens_ *= 1.0e7							# W m^-2 m^-1
+        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, 0.25)
+        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# erg s^-1 cm^-2 Ang^-1
+        intens__ *= 1.0e7							# W m^-2 m^-1
 
-        fluxes += Lum[i]*intens_
+        fluxes += Lum[i]*intens__
 
     return {'flux': fluxes[0]}
 

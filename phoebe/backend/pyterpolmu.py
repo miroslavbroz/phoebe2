@@ -89,7 +89,7 @@ def instrumental_broadening(wave, intens, width=0.25, type='fwhm'):
     if n_kernel%2 == 1:
         offset = 0.0
     else:
-        offset = dwave/2.0
+        offset = delta/2.0
 
     intens = np.interp(wave+offset, wave_, 1.0-intens_conv, left=1, right=1)
     return intens
