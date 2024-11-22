@@ -1024,6 +1024,10 @@ class PhoebeBackend(BaseBackendByTime):
         # b.compute_ld_coeffs(set_value=True) # TODO: only need if irradiation is enabled and only for bolometric
 
         system = kwargs.get('system', universe.System.from_bundle(b, compute, datasets=b.datasets, **kwargs))
+
+        # NOTE: for spectroscopy; 1 call 1.4 ms
+        system.distance = b.get_value(qualifier='distance', context='system', **_skip_filter_checks)
+
         # pblums_scale computed within run_compute and then passed as kwarg to run (so should be in kwargs sent to each worker)
         pblums_scale = kwargs.get('pblums_scale')
         for dataset in list(pblums_scale.keys()):
@@ -1165,7 +1169,6 @@ class PhoebeBackend(BaseBackendByTime):
         system.vxi = vxi
         system.vyi = vyi
         system.vzi = vzi
-        system.distance = b.get_value('distance@system')
 
         logger.debug("rank:{}/{} PhoebeBackend._run_single_time: filling packets at time={}".format(mpi.myrank, mpi.nprocs, time))
         # now let's loop through and prepare a packet which will fill the synthetics
