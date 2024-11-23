@@ -280,12 +280,15 @@ class SyntheticGrid():
         """
         props = np.array([props])
         wave = np.array(wave)
+        wmin = wave[0] - padding
+        wmax = wave[-1] + padding
 
         interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='nearest')
 
         s = Spectrum()
         s.wave = self.wave
         s.intens = interps['interps'][0]
+        s.truncate_spectrum(wmin, wmax)
 
         return s
 
