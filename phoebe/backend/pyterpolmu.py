@@ -230,7 +230,7 @@ class SyntheticGrid():
         s.truncate_spectrum(wmin, wmax)
         self.wave = s.wave
 
-        # read teffs, loggs -> N x M grid
+        # read teffs, loggs, zs -> I x J x K grid
         # Note: One needs to have 2 values of z!
         a = np.loadtxt(gridlist, usecols=[1, 2, 3], unpack=True)
         b = []
@@ -239,7 +239,6 @@ class SyntheticGrid():
             if len(tmp) < 2:
                 tmp = np.array((tmp[0], tmp[0]+ZERO_TOLERANCE))
             b.append(tmp)
-        b = np.array(b, dtype=object)
         c = np.arange(0,len(a[0]))
 
         grid = np.empty((len(b[0]), len(b[1]), len(b[2]), len(self.wave))) * np.nan
@@ -283,7 +282,7 @@ class SyntheticGrid():
         wmin = wave[0] - padding
         wmax = wave[-1] + padding
 
-        interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='nearest')
+        interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='linear')
 
         s = Spectrum()
         s.wave = self.wave
