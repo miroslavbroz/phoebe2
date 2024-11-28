@@ -94,7 +94,7 @@ def instrumental_broadening(wave, intens, width=0.25, type='fwhm'):
     intens = np.interp(wave+offset, wave_, 1.0-intens_conv, left=1, right=1)
     return intens
 
-def rotational_broadening(wave, intens, vrot, epsilon=0.6):
+def rotational_broadening(wave, intens, vrot, epsilon=0.0):
     """
     Rotational broadening.
 

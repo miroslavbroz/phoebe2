@@ -131,6 +131,7 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     mus = meshes.get_column_flat('mus', components)
     areas = meshes.get_column_flat('areas_si', components)
     rvs = (meshes.get_column_flat("rvs:{}".format(dataset), components)*u.solRad/u.d).to(u.m/u.s).value
+    drvs = (meshes.get_column_flat("drvs", components)*u.solRad/u.d).to(u.m/u.s).value
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
@@ -150,15 +151,17 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
         s = sg.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
         rv = rvs[i]*1.0e-3							# km/s
+        drv = drvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
         intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, fwhm)	# 1
-        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# 1
+        intens__ = pyterpolmu.rotational_broadening(wave_, intens_, drv)	# 1
+        intens___ = pyterpolmu.interpolate_spectrum(wave_, intens__, angstroms)	# 1
 
-        fluxes += Lum[i]*intens__
+        fluxes += Lum[i]*intens___
 
         if conf.devel:
             f = open("spectroscopy.tmp", "a")
-            np.savetxt(f, np.c_[len(angstroms)*[i], angstroms, intens__])
+            np.savetxt(f, np.c_[len(angstroms)*[i], angstroms, intens___])
             f.write("\n")
             f.close()
 
@@ -256,6 +259,7 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     areas = meshes.get_column_flat('areas_si', components)
     lds = meshes.get_column_flat("lds:{}".format(dataset), components)
     rvs = (meshes.get_column_flat("rvs:{}".format(dataset), components)*u.solRad/u.d).to(u.m/u.s).value
+    drvs = (meshes.get_column_flat("drvs", components)*u.solRad/u.d).to(u.m/u.s).value
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
@@ -282,12 +286,14 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
         s = sg2.get_synthetic_spectrum(props, angstroms, step=step, padding=20.0)
 
         rv = rvs[i]*1.0e-3							# km/s
+        drv = drvs[i]*1.0e-3							# km/s
         wave_ = pyterpolmu.doppler_shift(s.wave, rv)				# Ang
-        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, fwhm)
-        intens__ = pyterpolmu.interpolate_spectrum(wave_, intens_, angstroms)	# erg s^-1 cm^-2 Ang^-1
-        intens__ *= 1.0e7							# W m^-2 m^-1
+        intens_ = pyterpolmu.instrumental_broadening(wave_, s.intens, fwhm)	# erg s^-1 cm^-2 Ang^-1
+        intens__ = pyterpolmu.rotational_broadening(wave_, intens_, drv)	# erg s^-1 cm^-2 Ang^-1
+        intens___ = pyterpolmu.interpolate_spectrum(wave_, intens__, angstroms)	# erg s^-1 cm^-2 Ang^-1
+        intens___ *= 1.0e7							# W m^-2 m^-1
 
-        fluxes += Lum[i]*intens__
+        fluxes += Lum[i]*intens___
 
     return {'flux': fluxes[0]}
 

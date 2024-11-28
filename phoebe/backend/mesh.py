@@ -801,6 +801,17 @@ class ProtoMesh(object):
         return self.vertices[self.triangles]
 
     @property
+    def velocities_per_triangle(self):
+        return self.velocities[self.triangles]
+
+    @property
+    def drvs(self):
+        drvs = np.zeros((len(self.velocities_per_triangle)))
+        for i in range(len(drvs)):
+            drvs[i] = np.ptp(self.velocities_per_triangle[i,:,2])
+        return drvs
+
+    @property
     def triangles(self):
         """
         Return the array of triangles, where each item is a triplet of indices
