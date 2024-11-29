@@ -1186,9 +1186,9 @@ class PhoebeBackend(BaseBackendByTime):
             if kind in ['spe', 'sed'] and dataset != previous:
 
                 wavelengths = b.get_value(qualifier='wavelengths', dataset=dataset, context='dataset', **_skip_filter_checks)
-                fwhm = b.get_value(qualifier='fwhm', dataset=dataset, context='dataset', **_skip_filter_checks)
-
-                info['fwhm'] = fwhm
+                info['fwhm'] = b.get_value(qualifier='fwhm', dataset=dataset, context='dataset', **_skip_filter_checks)
+                info['use_instrumental'] = b.get_value(qualifier='use_instrumental', dataset=dataset, context='dataset', **_skip_filter_checks)
+                info['use_rotational'] = b.get_value(qualifier='use_rotational', dataset=dataset, context='dataset', **_skip_filter_checks)
 
             if kind == 'spe' and dataset != previous:
                 previous = dataset

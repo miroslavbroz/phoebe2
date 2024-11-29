@@ -118,7 +118,6 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     meshes = system.meshes
     components = info['component']
     dataset = info['dataset']
-    fwhm = info['fwhm']
 
     visibilities = meshes.get_column_flat('visibilities', components)
 
@@ -135,6 +134,9 @@ def spe_integrate(b, system, wavelengths=None, info={}, k=None):
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
+
+    fwhm = info['fwhm'] if info['use_instrumental'] else 0.0
+    drvs *= 1.0 if info['use_rotational'] else 0.0
 
     Lum = abs_intensities*areas*mus*visibilities	# J s^-1 m^-1
 
@@ -263,6 +265,9 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     teffs = meshes.get_column_flat('teffs', components)
     loggs = meshes.get_column_flat('loggs', components)
     zs = 10.0**meshes.get_column_flat('abuns', components)
+
+    fwhm = info['fwhm'] if info['use_instrumental'] else 0.0
+    drvs *= 1.0 if info['use_rotational'] else 0.0
 
     d = system.distance				# m
     Lum = lds*areas*mus*visibilities		# m^2

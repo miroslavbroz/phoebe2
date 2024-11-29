@@ -806,6 +806,9 @@ def spe(syn=False, as_ps=True, **kwargs):
         which method to use for computing monochromatic fluxes.
         If 'simple', eclipse effects will not be computed.
     * `fwhm` (float, optional, default=0.0): instrumental broadening (FWHM).
+    * `use_instrumental` (bool, optional, default=False): use instrumental broadening?
+    * `use_rotational` (bool, optional, default=True): use rotational broadening
+        of individual triangles?
     * `ld_mode` (string, optional, default='interp'): mode to use for handling
         limb-darkening.  Note that 'interp' is not available for all values
         of `atm` (availability can be checked by calling
@@ -851,6 +854,8 @@ def spe(syn=False, as_ps=True, **kwargs):
 
     params += [ChoiceParameter(qualifier='spe_method', value=kwargs.get('spe_method', 'integrate'), choices=['integrate', 'simple'], description='Method to use for computing synthetic spectra (must be integrate for eclipse effects)')]
     params += [FloatParameter(qualifier='fwhm', value=kwargs.get('fwhm', 0.0), default_unit=u.angstrom, limits=(0, None), description='Instrumental broadening (FWHM)')]
+    params += [BoolParameter(qualifier='use_instrumental', value=kwargs.get('use_instrumental', False), description='Use instrumental broadening of synthetic spectra?')]
+    params += [BoolParameter(qualifier='use_rotational', value=kwargs.get('use_rotational', True), description='Use rotational broadening of synthetic spectra for *individual* triangles?')]
 
     lc_params, lc_constraints = lc(syn=syn, as_ps=False, is_lc=False, **kwargs)
     params += lc_params
