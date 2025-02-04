@@ -74,7 +74,8 @@ def spe_simple(b, system, wavelengths=None, info={}, k=None):
         tmp = c.G*mass*u.solMass/(body.requiv*u.solRad)**2		# si
         logg = np.log10(tmp.cgs.value)					# cgs
         omega = body.freq_rot/u.day.to('s')				# rad/s
-        sini = body.polar_direction_xyz[2]				# 1
+        cosi = body.polar_direction_uvw[2]				# 1
+        sini = np.sqrt(1.0-cosi**2)					# 1
         vrot = (omega*body.requiv*u.solRad.to('m')*sini)*1.0e-3		# km/s
         z = 10.0**body.abun						# 1
 
