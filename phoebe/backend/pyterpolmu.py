@@ -263,7 +263,7 @@ class SyntheticGrid():
 
         # ndpolator instance
         self.ndp = ndpolator.Ndpolator(basic_axes=(b[0], b[1], b[2]))
-        self.ndp.register(table='main', grid=grid, associated_axes=None)
+        self.ndp.register(name='main', grid=grid, associated_axes=None)
 
     def get_synthetic_spectrum(self, props, wave, step=0.01, padding=20.0):
         """
@@ -282,7 +282,7 @@ class SyntheticGrid():
         wmin = wave[0] - padding
         wmax = wave[-1] + padding
 
-        interps = self.ndp.ndpolate(table='main', query_pts=props, extrapolation_method='linear')
+        interps = self.ndp.ndpolate(name='main', query_pts=props, extrapolation_method='linear')
 
         s = Spectrum()
         s.wave = self.wave
