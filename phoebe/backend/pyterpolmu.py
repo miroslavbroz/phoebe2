@@ -203,6 +203,9 @@ class Spectrum():
         w1 = self.wave[0]
         w2 = self.wave[-1]
 
+        if wmin < w1 or wmax > w2:
+            return
+
         i = int((wmin-w1)/(w2-w1)*n + 0.0)
         j = int((wmax-w1)/(w2-w1)*n + 0.5)
 
