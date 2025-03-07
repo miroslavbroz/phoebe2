@@ -251,7 +251,6 @@ def sed_integrate(b, system, wavelengths=None, bandwidths=None, info={}, k=None)
     meshes = system.meshes
     components = info['component']
     dataset = info['dataset']
-    fwhm = info['fwhm']
 
     visibilities = meshes.get_column_flat('visibilities', components)
 
