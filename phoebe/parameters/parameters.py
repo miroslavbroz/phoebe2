@@ -212,7 +212,8 @@ _forbidden_labels += ['requiv', 'requiv_max', 'requiv_min', 'teff', 'abun', 'log
                       'dperdt', 'ecc', 'deccdt', 't0_perpass', 't0_supconj',
                       't0_ref', 'mean_anom', 'q', 'sma', 'asini', 'ecosw', 'esinw',
                       'teffratio', 'requivratio', 'requivsumfrac',
-                      'j2'
+                      'j2',
+                      'k2', 'tau'
                       ]
 
 # from dataset:
@@ -258,7 +259,9 @@ _forbidden_labels += ['enabled', 'dynamics_method', 'ltte', 'comments',
                       'gridsize', 'refl_num', 'ie',
                       'stepsize', 'orbiterror', 'ringsize',
                       'exact_grav', 'grid', 'hf',
-                      'sample_from', 'sample_from_combine', 'sample_num', 'sample_mode'
+                      'sample_from', 'sample_from_combine', 'sample_num', 'sample_mode',
+                      'j2',
+                      'tide'
                       ]
 
 # from solver:

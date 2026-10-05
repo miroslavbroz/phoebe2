@@ -107,6 +107,10 @@ def dynamics_from_bundle(b, times, compute=None, return_roche_euler=False, **kwa
     requivs = [b.get_value(qualifier='requiv', unit=u.AU, component=component, context='component', **_skip_filter_checks) for component in starrefs]
     incls_ = [b.get_value(qualifier='incl', unit=u.rad, component=component, context='component', **_skip_filter_checks) for component in starrefs]
     long_ans_ = [b.get_value(qualifier='long_an', unit=u.rad, component=component, context='component', **_skip_filter_checks) for component in starrefs]
+
+    tide = computeps.get_value(qualifier='tide', tide=kwargs.get('tide', None), **_skip_filter_checks)
+    k2s = [b.get_value(qualifier='k2', unit=u.dimensionless_unscaled, component=component, context='component', **_skip_filter_checks) for component in starrefs]
+    taus = [b.get_value(qualifier='tau', unit=u.d, component=component, context='component', **_skip_filter_checks) for component in starrefs]
     
     nbod = len(masses)
     spins = []
@@ -132,6 +136,9 @@ def dynamics_from_bundle(b, times, compute=None, return_roche_euler=False, **kwa
                j2s=j2s, \
                requivs=requivs, \
                spins=spins, \
+               tide=tide, \
+               k2s=k2s, \
+               taus=taus, \
                return_roche_euler=return_roche_euler \
                )
 
@@ -149,6 +156,9 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
         j2s=None, \
         requivs=None, \
         spins=None, \
+        tide=False, \
+        k2s=None, \
+        taus=None, \
         return_roche_euler=False \
         ):
 
@@ -200,6 +210,9 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
     if j2 and not _is_reboundx:
         raise ImportError("reboundx is not installed (required for j2 effects)")
 
+    if tide and not _is_reboundx:
+        raise ImportError("reboundx is not installed (required for tidal effects)")
+
     times = np.asarray(times)
 
     nbod = len(masses)
@@ -249,13 +262,23 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
 
     if j2:
         logger.info("enabling 'gravitational_harmonics' in reboundx")
-        rebx = reboundx.Extras(sim)
         gh = rebx.load_force("gravitational_harmonics")
         rebx.add_force(gh)
 
         for j in range(0, nbod):
             sim.particles[j].params["J2"] = j2s[j]
             sim.particles[j].params["R_eq"] = requivs[j]
+            sim.particles[j].params["Omega"] = spins[j]
+
+    if tide:
+        logger.info("enabling 'tides_spin' in reboundx")
+        ts = rebx.load_force("tides_spin")
+        rebx.add_force(ts)
+
+        for j in range(0, nbod):
+            sim.particles[j].r = requivs[j]
+            sim.particles[j].params["k2"] = k2s[j]
+            sim.particles[j].params["tau"] = taus[j]
             sim.particles[j].params["Omega"] = spins[j]
 
     rb = np.zeros((nbod, 3))

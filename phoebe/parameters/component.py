@@ -203,6 +203,8 @@ def star(component, **kwargs):
     params += [FloatParameter(qualifier='incl', latexfmt=r'i_\mathrm{{ {component} }}', visible_if='hierarchy.is_contact_binary:False', value=kwargs.get('incl', 90), default_unit=u.deg, advanced=True, description='Inclination of the stellar rotation axis')]
     params += [FloatParameter(qualifier='long_an', visible_if='hierarchy.is_contact_binary:False', value=kwargs.get('long_an', 0.0), default_unit=u.deg, advanced=True, description='Longitude of the ascending node (ie. equator) of the star')]
     params += [FloatParameter(qualifier='j2', value=kwargs.get('j2', 0.0), default_unit=u.dimensionless_unscaled, advanced=True, description='J2 = -C20, oblateness, gravitational quadrupole moment')]
+    params += [FloatParameter(qualifier='k2', value=kwargs.get('k2', 0.0), default_unit=u.dimensionless_unscaled, advanced=True, description='k2, Love number')]
+    params += [FloatParameter(qualifier='tau', value=kwargs.get('tau', 0.0), default_unit=u.d, advanced=True, description='tau, tidal time lag')]
 
     # params += [FloatParameter(qualifier='vsini', value=kwargs.get('vsini', 1), default_unit=u.km/u.s, description='Projected maximum rotational velocity')]
 
