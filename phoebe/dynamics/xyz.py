@@ -268,7 +268,7 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
         for j in range(0, nbod):
             sim.particles[j].params["J2"] = j2s[j]
             sim.particles[j].params["R_eq"] = requivs[j]
-            sim.particles[j].params["Omega"] = spins[j]
+            sim.particles[j].params["Omega"] = 2.0*np.pi/rotperiods[j] * spins[j]
 
     if tide:
         logger.info("enabling 'tides_spin' in reboundx")
@@ -279,7 +279,7 @@ def dynamics(times, masses, xi, yi, zi, vxi, vyi, vzi, \
             sim.particles[j].r = requivs[j]
             sim.particles[j].params["k2"] = k2s[j]
             sim.particles[j].params["tau"] = taus[j]
-            sim.particles[j].params["Omega"] = spins[j]
+            sim.particles[j].params["Omega"] = 2.0*np.pi/rotperiods[j] * spins[j]
 
     rb = np.zeros((nbod, 3))
     vb = np.zeros((nbod, 3))
